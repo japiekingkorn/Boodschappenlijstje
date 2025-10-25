@@ -18,14 +18,19 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             overflow: hidden;
             height: 100vh;
+            padding-bottom: env(safe-area-inset-bottom);
         }
         #root {
             height: 100vh;
             display: flex;
             flex-direction: column;
+            padding-bottom: env(safe-area-inset-bottom);
         }
         * {
             -webkit-tap-highlight-color: transparent;
+        }
+        .bottom-nav {
+            padding-bottom: calc(env(safe-area-inset-bottom) + 8px);
         }
     </style>
 </head>
@@ -706,20 +711,20 @@
                         {activeTab === 'file' && <FileTab />}
                     </div>
 
-                    <div className="flex border-t bg-white">
-                        <button onClick={() => setActiveTab('stores')} className={`flex-1 flex flex-col items-center py-2 ${activeTab === 'stores' ? 'text-blue-600' : 'text-gray-400'}`}>
+                    <div className="flex border-t bg-white bottom-nav">
+                        <button onClick={() => setActiveTab('stores')} className={`flex-1 flex flex-col items-center py-3 ${activeTab === 'stores' ? 'text-blue-600' : 'text-gray-400'}`}>
                             <HomeIcon />
                             <span className="text-xs mt-1">Stores</span>
                         </button>
-                        <button onClick={() => setActiveTab('items')} className={`flex-1 flex flex-col items-center py-2 ${activeTab === 'items' ? 'text-blue-600' : 'text-gray-400'}`}>
+                        <button onClick={() => setActiveTab('items')} className={`flex-1 flex flex-col items-center py-3 ${activeTab === 'items' ? 'text-blue-600' : 'text-gray-400'}`}>
                             <ListIcon />
                             <span className="text-xs mt-1">Items</span>
                         </button>
-                        <button onClick={() => setActiveTab('list')} className={`flex-1 flex flex-col items-center py-2 ${activeTab === 'list' ? 'text-blue-600' : 'text-gray-400'}`}>
+                        <button onClick={() => setActiveTab('list')} className={`flex-1 flex flex-col items-center py-3 ${activeTab === 'list' ? 'text-blue-600' : 'text-gray-400'}`}>
                             <CartIcon />
                             <span className="text-xs mt-1">List</span>
                         </button>
-                        <button onClick={() => setActiveTab('file')} className={`flex-1 flex flex-col items-center py-2 ${activeTab === 'file' ? 'text-blue-600' : 'text-gray-400'}`}>
+                        <button onClick={() => setActiveTab('file')} className={`flex-1 flex flex-col items-center py-3 ${activeTab === 'file' ? 'text-blue-600' : 'text-gray-400'}`}>
                             <FolderIcon />
                             <span className="text-xs mt-1">File</span>
                         </button>
