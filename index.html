@@ -137,9 +137,28 @@
             };
 
             const updateQuantity = (itemId, change) => {
-                const item = items.find(i => i.id === itemId);
-                const newQuantity = Math.max(0, (item.quantity || 0) + change);
-                updateItem(itemId, { quantity: newQuantity });
+                // Update items array
+                const newItems = items.map(item => {
+                    if (item.id === itemId) {
+                        return { ...item, quantity: Math.max(0, (item.quantity || 0) + change) };
+                    }
+                    return item;
+                });
+                
+                // Save to localStorage WITHOUT triggering re-render
+                localStorage.setItem('ezshop_items', JSON.stringify(newItems));
+                
+                // Manually update the DOM to avoid scroll jump
+                const quantityElement = document.querySelector(`[data-item-id="${itemId}"] .quantity-display`);
+                if (quantityElement) {
+                    const item = newItems.find(i => i.id === itemId);
+                    quantityElement.textContent = item.quantity || 0;
+                }
+                
+                // Update state silently (batched, won't cause immediate re-render during scrolling)
+                setTimeout(() => {
+                    setItems(newItems);
+                }, 100);
             };
 
             const toggleBought = (itemId) => {
@@ -416,7 +435,7 @@
                         </button>
                     </div>
 
-                    <div className="flex-1 overflow-auto">
+                    <div ref={itemsScrollRef} className="flex-1 overflow-auto">
                         {categories.map(category => (
                             <div key={category.id} className="border-b">
                                 <div onClick={() => toggleCategory(category.id)} className="flex items-center px-4 py-3 bg-gray-50 cursor-pointer hover:bg-gray-100">
