@@ -36,58 +36,11 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef, useCallback, memo } = React;
-
-        // Separate ItemRow component that manages its own quantity
-        const ItemRow = memo(({ item, editMode, onDelete, onShowDetail, onQuantityChange }) => {
-            const [quantity, setQuantity] = useState(item.quantity || 0);
-
-            const MinusIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" /></svg>;
-            const PlusIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>;
-            const ChevronRightIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>;
-
-            const handleIncrement = (e) => {
-                e.stopPropagation();
-                const newQty = quantity + 1;
-                setQuantity(newQty);
-                onQuantityChange(item.id, newQty);
-            };
-
-            const handleDecrement = (e) => {
-                e.stopPropagation();
-                const newQty = Math.max(0, quantity - 1);
-                setQuantity(newQty);
-                onQuantityChange(item.id, newQty);
-            };
-
-            return (
-                <div className="flex items-center px-4 py-3 pl-12 border-b bg-white hover:bg-gray-50">
-                    {editMode && (
-                        <button onClick={(e) => { e.stopPropagation(); onDelete(item.id); }} className="mr-2 text-red-600">
-                            <MinusIcon />
-                        </button>
-                    )}
-                    <div className="flex-1 cursor-pointer" onClick={() => !editMode && onShowDetail(item)}>{item.name}</div>
-                    <div className="flex items-center gap-2">
-                        <button onClick={handleDecrement} className="w-8 h-8 flex items-center justify-center border rounded active:bg-gray-200">
-                            <MinusIcon />
-                        </button>
-                        <span className="w-12 text-center">{quantity}</span>
-                        <button onClick={handleIncrement} className="w-8 h-8 flex items-center justify-center border rounded active:bg-gray-200">
-                            <PlusIcon />
-                        </button>
-                    </div>
-                    {!editMode && (
-                        <button onClick={() => onShowDetail(item)} className="ml-2 cursor-pointer">
-                            <ChevronRightIcon />
-                        </button>
-                    )}
-                </div>
-            );
-        });
+        const { useState, useEffect, useRef, useCallback } = React;
 
         const EzShopList = () => {
             const itemsScrollRef = useRef(null);
+            const quantitiesRef = useRef({});
             const [activeTab, setActiveTab] = useState('stores');
             const [stores, setStores] = useState([]);
             const [categories, setCategories] = useState([]);
