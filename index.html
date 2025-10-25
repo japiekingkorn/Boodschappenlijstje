@@ -36,11 +36,10 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+        const { useState, useEffect, useRef, useCallback } = React;
 
         const EzShopList = () => {
             const itemsScrollRef = useRef(null);
-            const savedScrollPos = useRef(0);
             const [activeTab, setActiveTab] = useState('stores');
             const [stores, setStores] = useState([]);
             const [categories, setCategories] = useState([]);
@@ -451,7 +450,7 @@
                                 {expandedCategories[category.id] && (
                                     <div>
                                         {items.filter(item => item.categoryId === category.id).map(item => (
-                                            <div key={item.id} className="flex items-center px-4 py-3 pl-12 border-b bg-white hover:bg-gray-50">
+                                            <div key={item.id} data-item-id={item.id} className="flex items-center px-4 py-3 pl-12 border-b bg-white hover:bg-gray-50">
                                                 {editMode && (
                                                     <button onClick={(e) => { e.stopPropagation(); deleteItem(item.id); }} className="mr-2 text-red-600">
                                                         <MinusIcon />
@@ -462,7 +461,7 @@
                                                     <button onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, -1); }} className="w-8 h-8 flex items-center justify-center border rounded active:bg-gray-200">
                                                         <MinusIcon />
                                                     </button>
-                                                    <span className="w-12 text-center">{item.quantity || 0}</span>
+                                                    <span className="w-12 text-center quantity-display">{item.quantity || 0}</span>
                                                     <button onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, 1); }} className="w-8 h-8 flex items-center justify-center border rounded active:bg-gray-200">
                                                         <PlusIcon />
                                                     </button>
