@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="ezShopList">
+    <title>ezShopList</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+        }
+        #root {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const EzShopList = () => {
+            const [activeTab, setActiveTab] = useState('stores');
+            const [stores, setStores] = useState([]);
+            const [categories, setCategories] = useState([]);
+            const [items, setItems] = useState([]);
+            const [selectedStore, setSelectedStore] = useState('all');
+            const [expandedCategories, setExpandedCategories] = useState({});
+            const [editMode, setEditMode] = useState(false);
+            const [showAddStore, setShowAddStore] = useState(false);
+            const [showAddCategory, setShowAddCategory] = useState(false);
+            const [showAddItem, setShowAddItem] = useState(false);
+            const [showItemDetail, setShowItemDetail] = useState(null);
+            const [showStoreDetail, setShowStoreDetail] = useState(null);
+            const [newStoreName, setNewStoreName] = useState('');
+            const [newCategoryName, setNewCategoryName] = useState('');
+            const [newItemName, setNewItemName] = useState('');
+            const [newItemCategory, setNewItemCategory] = useState('');
+            const [newItemQuantity, setNewItemQuantity] = useState(1);
+
+            // Load data from localStorage
+            useEffect(() => {
+                try {
+                    const storesData = localStorage.getItem('ezshop_stores');
+                    const categoriesData = localStorage.getItem('ezshop_categories');
+                    const itemsData = localStorage.getItem('ezshop_items');
+                    
+                    if (storesData) setStores(JSON.parse(storesData));
+                    if (categoriesData) setCategories(JSON.parse(categoriesData));
+                    if (itemsData) setItems(JSON.parse(itemsData));
+                } catch (error) {
+                    console.log('No saved data found');
+                }
+            }, []);
+
+            // Save functions
+            const saveStores = (data) => {
+                setStores(data);
+                localStorage.setItem('ezshop_stores', JSON.stringify(data));
+            };
+
+            const saveCategories = (data) => {
+                setCategories(data);
+                localStorage.setItem('ezshop_categories', JSON.stringify(data));
+            };
+
+            const saveItems = (data) => {
+                setItems(data);
+                localStorage.setItem('ezshop_items', JSON.stringify(data));
+            };
+
+            // Store functions
+            const addStore = () => {
+                if (newStoreName.trim()) {
+                    saveStores([...stores, {
+                        id: Date.now(),
+                        name: newStoreName,
+                        sections: []
+                    }]);
+                    setNewStoreName('');
+                    setShowAddStore(false);
+                }
+            };
+
+            const deleteStore = (id) => {
+                saveStores(stores.filter(s => s.id !== id));
+            };
+
+            const updateStore = (id, updates) => {
+                saveStores(stores.map(store => store.id === id ? { ...store, ...updates } : store));
+            };
+
+            // Category functions
+            const addCategory = () => {
+                if (newCategoryName.trim()) {
+                    saveCategories([...categories, {
+                        id: Date.now(),
+                        name: newCategoryName
+                    }]);
+                    setNewCategoryName('');
+                    setShowAddCategory(false);
+                }
+            };
+
+            const deleteCategory = (id) => {
+                saveCategories(categories.filter(c => c.id !== id));
+            };
+
+            // Item functions
+            const addItem = () => {
+                if (newItemName.trim() && newItemCategory) {
+                    saveItems([...items, {
+                        id: Date.now(),
+                        name: newItemName,
+                        categoryId: newItemCategory,
+                        defaultQuantity: newItemQuantity,
+                        storeData: {},
+                        quantity: 0,
+                        bought: false
+                    }]);
+                    setNewItemName('');
+                    setNewItemCategory('');
+                    setNewItemQuantity(1);
+                    setShowAddItem(false);
+                }
+            };
+
+            const deleteItem = (id) => {
+                saveItems(items.filter(i => i.id !== id));
+                setShowItemDetail(null);
+            };
+
+            const updateItem = (id, updates) => {
+                saveItems(items.map(item => item.id === id ? { ...item, ...updates } : item));
+            };
+
+            const updateQuantity = (itemId, change) => {
+                const item = items.find(i => i.id === itemId);
+                const newQuantity = Math.max(0, (item.quantity || 0) + change);
+                updateItem(itemId, { quantity: newQuantity });
+            };
+
+            const toggleBought = (itemId) => {
+                const item = items.find(i => i.id === itemId);
+                updateItem(itemId, { bought: !item.bought });
+            };
+
+            const clearBoughtItems = () => {
+                saveItems(items.map(item => 
+                    item.bought ? { ...item, quantity: 0, bought: false } : item
+                ));
+            };
+
+            const toggleCategory = (catId) => {
+                setExpandedCategories(prev => ({
+                    ...prev,
+                    [catId]: !prev[catId]
+                }));
+            };
+
+            const getStoreItemCount = (storeId) => {
+                if (storeId === 'all') {
+                    return items.filter(item => item.quantity > 0).length;
+                }
+                return items.filter(item => 
+                    item.storeData[storeId] && item.quantity > 0
+                ).length;
+            };
+
+            const getListItems = () => {
+                const storeId = selectedStore;
+                return items.filter(item => {
+                    if (item.quantity === 0) return false;
+                    if (storeId === 'all') return true;
+                    return item.storeData[storeId];
+                }).sort((a, b) => {
+                    if (storeId !== 'all') {
+                        const sectionA = a.storeData[storeId]?.section || '';
+                        const sectionB = b.storeData[storeId]?.section || '';
+                        if (sectionA !== sectionB) return sectionA.localeCompare(sectionB);
+                    }
+                    return a.name.localeCompare(b.name);
+                });
+            };
+
+            // CSV Import
+            const handleCSVImport = (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const text = e.target.result;
+                        const lines = text.split('\n');
+                        const headers = lines[0].split(',').map(h => h.trim());
+
+                        const storeColumns = {};
+                        headers.forEach((header, index) => {
+                            const match = header.match(/^(.+?)\s+(cost|section)$/);
+                            if (match) {
+                                const storeName = match[1];
+                                const type = match[2];
+                                if (!storeColumns[storeName]) {
+                                    storeColumns[storeName] = {};
+                                }
+                                storeColumns[storeName][type] = index;
+                            }
+                        });
+
+                        const newStores = Object.keys(storeColumns).map((name, idx) => ({
+                            id: Date.now() + idx,
+                            name: name,
+                            sections: []
+                        }));
+
+                        const categoryMap = {};
+                        const newItems = [];
+                        const nameIndex = headers.indexOf('Name');
+                        const quantityIndex = headers.indexOf('Quantity');
+                        const categoryIndex = headers.indexOf('Category');
+
+                        for (let i = 1; i < lines.length; i++) {
+                            const line = lines[i].trim();
+                            if (!line) continue;
+
+                            const values = line.split(',').map(v => v.trim());
+                            const itemName = values[nameIndex];
+                            const quantity = parseInt(values[quantityIndex]) || 0;
+                            const categoryName = values[categoryIndex];
+
+                            if (!itemName || !categoryName) continue;
+
+                            if (!categoryMap[categoryName]) {
+                                categoryMap[categoryName] = {
+                                    id: Date.now() + Object.keys(categoryMap).length,
+                                    name: categoryName
+                                };
+                            }
+
+                            const storeData = {};
+                            newStores.forEach(store => {
+                                const cols = storeColumns[store.name];
+                                if (cols) {
+                                    const section = values[cols.section] || '';
+                                    if (section) {
+                                        storeData[store.id] = { section };
+                                        if (!store.sections.includes(section)) {
+                                            store.sections.push(section);
+                                        }
+                                    }
+                                }
+                            });
+
+                            newItems.push({
+                                id: Date.now() + i,
+                                name: itemName,
+                                categoryId: categoryMap[categoryName].id,
+                                defaultQuantity: 1,
+                                quantity: quantity,
+                                bought: false,
+                                storeData: storeData
+                            });
+                        }
+
+                        const newCategories = Object.values(categoryMap);
+                        saveStores(newStores);
+                        saveCategories(newCategories);
+                        saveItems(newItems);
+
+                        alert(`Geïmporteerd: ${newStores.length} winkels, ${newCategories.length} categorieën, ${newItems.length} items!`);
+                    } catch (error) {
+                        console.error('Import error:', error);
+                        alert('Import mislukt. Controleer het CSV formaat.');
+                    }
+                };
+                reader.readAsText(file);
+                event.target.value = '';
+            };
+
+            // CSV Export
+            const handleCSVExport = () => {
+                const headers = ['Name', 'Quantity', 'Category'];
+                stores.forEach(store => {
+                    headers.push(`${store.name} cost`, `${store.name} section`);
+                });
+
+                const rows = [headers.join(',')];
+                items.forEach(item => {
+                    const category = categories.find(c => c.id === item.categoryId);
+                    const row = [
+                        item.name,
+                        item.quantity || 0,
+                        category?.name || ''
+                    ];
+                    stores.forEach(store => {
+                        row.push('€ 0,00');
+                        row.push(item.storeData[store.id]?.section || '');
+                    });
+                    rows.push(row.join(','));
+                });
+
+                const csv = rows.join('\n');
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'ezshoplist_export.csv';
+                a.click();
+                URL.revokeObjectURL(url);
+            };
+
+            // Icons as inline SVG
+            const HomeIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>;
+            const ListIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>;
+            const CartIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>;
+            const FolderIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>;
+            const PlusIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>;
+            const MinusIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" /></svg>;
+            const CheckIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>;
+            const ChevronRightIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>;
+            const ChevronDownIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>;
+            const XIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>;
+            const TrashIcon = () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>;
+            const UploadIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>;
+            const DownloadIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>;
+
+            // Render tabs
+            const StoresTab = () => (
+                <div className="flex flex-col h-full">
+                    <div className="flex justify-between items-center p-4 border-b">
+                        <h1 className="text-xl font-bold">Stores</h1>
+                        <button onClick={() => setEditMode(!editMode)} className="px-4 py-2 text-blue-600">
+                            {editMode ? 'Done' : 'Edit'}
+                        </button>
+                    </div>
+                    
+                    <div className="flex-1 overflow-auto">
+                        <div className="bg-gray-100 px-4 py-2 flex">
+                            <div className="flex-1 font-semibold">Store Name</div>
+                            <div className="w-20 text-center font-semibold">Quantity</div>
+                            <div className="w-20 text-center font-semibold">Selected</div>
+                        </div>
+
+                        <div onClick={() => !editMode && setSelectedStore('all')} className="flex items-center px-4 py-3 border-b bg-white cursor-pointer hover:bg-gray-50">
+                            <div className="flex-1 font-semibold">All Stores</div>
+                            <div className="w-20 text-center">{getStoreItemCount('all')}</div>
+                            <div className="w-20 text-center">
+                                {selectedStore === 'all' && <CheckIcon />}
+                            </div>
+                        </div>
+
+                        {stores.map(store => (
+                            <div key={store.id} className="border-b bg-white">
+                                <div onClick={() => !editMode && setSelectedStore(store.id)} className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50">
+                                    {editMode && (
+                                        <button onClick={(e) => { e.stopPropagation(); deleteStore(store.id); }} className="mr-2 text-red-600">
+                                            <MinusIcon />
+                                        </button>
+                                    )}
+                                    <div className="flex-1">{store.name}</div>
+                                    <div className="w-20 text-center">{getStoreItemCount(store.id)}</div>
+                                    <div className="w-20 text-center">
+                                        {selectedStore === store.id && <CheckIcon />}
+                                    </div>
+                                    {!editMode && (
+                                        <button onClick={(e) => { e.stopPropagation(); setShowStoreDetail(store); }} className="ml-2">
+                                            <ChevronRightIcon />
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {editMode && (
+                        <div className="p-4 border-t bg-white">
+                            {showAddStore ? (
+                                <div className="flex gap-2">
+                                    <input type="text" value={newStoreName} onChange={(e) => setNewStoreName(e.target.value)} placeholder="Store name" className="flex-1 px-3 py-2 border rounded" autoFocus />
+                                    <button onClick={addStore} className="px-4 py-2 bg-blue-600 text-white rounded">Add</button>
+                                    <button onClick={() => setShowAddStore(false)} className="px-4 py-2 border rounded">Cancel</button>
+                                </div>
+                            ) : (
+                                <button onClick={() => setShowAddStore(true)} className="w-full py-2 border-2 border-dashed rounded flex items-center justify-center gap-2 text-blue-600">
+                                    <PlusIcon /> Add Store
+                                </button>
+                            )}
+                        </div>
+                    )}
+
+                    {showStoreDetail && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                            <div className="bg-white rounded-lg w-full max-w-md max-h-[80vh] overflow-auto">
+                                <div className="flex justify-between items-center p-4 border-b">
+                                    <h2 className="text-lg font-bold">{showStoreDetail.name}</h2>
+                                    <button onClick={() => setShowStoreDetail(null)} className="text-gray-600"><XIcon /></button>
+                                </div>
+                                <div className="p-4">
+                                    <h3 className="font-semibold mb-2">Secties</h3>
+                                    <div className="space-y-2">
+                                        {showStoreDetail.sections.map((section, idx) => (
+                                            <div key={idx} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                                                <span>{section}</span>
+                                                <button onClick={() => {
+                                                    const updated = { ...showStoreDetail };
+                                                    updated.sections = updated.sections.filter((s, i) => i !== idx);
+                                                    setShowStoreDetail(updated);
+                                                    updateStore(updated.id, { sections: updated.sections });
+                                                }} className="text-red-600"><TrashIcon /></button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <input type="text" placeholder="Voeg nieuwe sectie toe" className="w-full px-3 py-2 border rounded mt-4" onKeyPress={(e) => {
+                                        if (e.key === 'Enter' && e.target.value.trim()) {
+                                            const updated = { ...showStoreDetail };
+                                            updated.sections = [...updated.sections, e.target.value.trim()];
+                                            setShowStoreDetail(updated);
+                                            updateStore(updated.id, { sections: updated.sections });
+                                            e.target.value = '';
+                                        }
+                                    }} />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+
+            const ItemsTab = () => (
+                <div className="flex flex-col h-full">
+                    <div className="flex justify-between items-center p-4 border-b">
+                        <h1 className="text-xl font-bold">Items</h1>
+                        <button onClick={() => setEditMode(!editMode)} className="px-4 py-2 text-blue-600">
+                            {editMode ? 'Done' : 'Edit'}
+                        </button>
+                    </div>
+
+                    <div className="flex-1 overflow-auto">
+                        {categories.map(category => (
+                            <div key={category.id} className="border-b">
+                                <div onClick={() => toggleCategory(category.id)} className="flex items-center px-4 py-3 bg-gray-50 cursor-pointer hover:bg-gray-100">
+                                    {editMode && (
+                                        <button onClick={(e) => { e.stopPropagation(); deleteCategory(category.id); }} className="mr-2 text-red-600">
+                                            <MinusIcon />
+                                        </button>
+                                    )}
+                                    {expandedCategories[category.id] ? <ChevronDownIcon /> : <ChevronRightIcon />}
+                                    <span className="font-semibold ml-2">{category.name}</span>
+                                </div>
+
+                                {expandedCategories[category.id] && (
+                                    <div>
+                                        {items.filter(item => item.categoryId === category.id).map(item => (
+                                            <div key={item.id} onClick={() => !editMode && setShowItemDetail(item)} className="flex items-center px-4 py-3 pl-12 border-b bg-white cursor-pointer hover:bg-gray-50">
+                                                {editMode && (
+                                                    <button onClick={(e) => { e.stopPropagation(); deleteItem(item.id); }} className="mr-2 text-red-600">
+                                                        <MinusIcon />
+                                                    </button>
+                                                )}
+                                                <div className="flex-1">{item.name}</div>
+                                                <div className="flex items-center gap-2">
+                                                    <button onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, -1); }} className="w-8 h-8 flex items-center justify-center border rounded">
+                                                        <MinusIcon />
+                                                    </button>
+                                                    <span className="w-12 text-center">{item.quantity || 0}</span>
+                                                    <button onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, 1); }} className="w-8 h-8 flex items-center justify-center border rounded">
+                                                        <PlusIcon />
+                                                    </button>
+                                                </div>
+                                                {!editMode && <ChevronRightIcon />}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+
+                    {editMode && (
+                        <div className="p-4 border-t bg-white space-y-2">
+                            {showAddCategory ? (
+                                <div className="flex gap-2">
+                                    <input type="text" value={newCategoryName} onChange={(e) => setNewCategoryName(e.target.value)} placeholder="Category name" className="flex-1 px-3 py-2 border rounded" autoFocus />
+                                    <button onClick={addCategory} className="px-4 py-2 bg-blue-600 text-white rounded">Add</button>
+                                    <button onClick={() => setShowAddCategory(false)} className="px-4 py-2 border rounded">Cancel</button>
+                                </div>
+                            ) : (
+                                <button onClick={() => setShowAddCategory(true)} className="w-full py-2 border-2 border-dashed rounded flex items-center justify-center gap-2 text-blue-600">
+                                    <PlusIcon /> Add Category
+                                </button>
+                            )}
+
+                            {showAddItem ? (
+                                <div className="space-y-2">
+                                    <input type="text" value={newItemName} onChange={(e) => setNewItemName(e.target.value)} placeholder="Item name" className="w-full px-3 py-2 border rounded" />
+                                    <select value={newItemCategory} onChange={(e) => setNewItemCategory(e.target.value)} className="w-full px-3 py-2 border rounded">
+                                        <option value="">Select category</option>
+                                        {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
+                                    </select>
+                                    <div className="flex gap-2">
+                                        <button onClick={addItem} className="flex-1 py-2 bg-blue-600 text-white rounded">Add Item</button>
+                                        <button onClick={() => setShowAddItem(false)} className="flex-1 py-2 border rounded">Cancel</button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <button onClick={() => setShowAddItem(true)} className="w-full py-2 border-2 border-dashed rounded flex items-center justify-center gap-2 text-green-600">
+                                    <PlusIcon /> Add Item
+                                </button>
+                            )}
+                        </div>
+                    )}
+
+                    {showItemDetail && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                            <div className="bg-white rounded-lg w-full max-w-md max-h-[80vh] overflow-auto">
+                                <div className="flex justify-between items-center p-4 border-b">
+                                    <h2 className="text-lg font-bold">Item Details</h2>
+                                    <button onClick={() => setShowItemDetail(null)} className="text-gray-600"><XIcon /></button>
+                                </div>
+                                <div className="p-4 space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-semibold mb-1">Category</label>
+                                        <select value={showItemDetail.categoryId} onChange={(e) => {
+                                            const updated = { ...showItemDetail, categoryId: e.target.value };
+                                            setShowItemDetail(updated);
+                                            updateItem(updated.id, { categoryId: e.target.value });
+                                        }} className="w-full px-3 py-2 border rounded">
+                                            {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-semibold mb-2">Store Secties</label>
+                                        {stores.map(store => {
+                                            const storeData = showItemDetail.storeData[store.id] || {};
+                                            return (
+                                                <div key={store.id} className="mb-2">
+                                                    <label className="text-sm text-gray-600">{store.name}</label>
+                                                    <select value={storeData.section || ''} onChange={(e) => {
+                                                        const updated = { ...showItemDetail };
+                                                        if (e.target.value) {
+                                                            updated.storeData[store.id] = { section: e.target.value };
+                                                        } else {
+                                                            delete updated.storeData[store.id];
+                                                        }
+                                                        setShowItemDetail(updated);
+                                                        updateItem(updated.id, { storeData: updated.storeData });
+                                                    }} className="w-full px-3 py-1 border rounded text-sm">
+                                                        <option value="">Niet in deze winkel</option>
+                                                        {store.sections.map((section, idx) => <option key={idx} value={section}>{section}</option>)}
+                                                    </select>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+
+            const ListTab = () => {
+                const listItems = getListItems();
+                const toBuy = listItems.filter(item => !item.bought);
+                const bought = listItems.filter(item => item.bought);
+
+                return (
+                    <div className="flex flex-col h-full">
+                        <div className="flex justify-between items-center p-4 border-b">
+                            <h1 className="text-xl font-bold">
+                                {selectedStore === 'all' ? 'All Stores' : stores.find(s => s.id === selectedStore)?.name || 'Select Store'}
+                            </h1>
+                            {bought.length > 0 && (
+                                <button onClick={clearBoughtItems} className="px-4 py-2 text-blue-600">Clear</button>
+                            )}
+                        </div>
+
+                        <div className="flex-1 overflow-auto">
+                            {toBuy.length > 0 && (
+                                <div>
+                                    <div className="bg-gray-100 px-4 py-2 font-semibold">To Buy</div>
+                                    {toBuy.map(item => {
+                                        const category = categories.find(c => c.id === item.categoryId);
+                                        const section = selectedStore !== 'all' ? item.storeData[selectedStore]?.section : null;
+                                        return (
+                                            <div key={item.id} onClick={() => toggleBought(item.id)} className="flex items-center px-4 py-3 border-b bg-white cursor-pointer hover:bg-gray-50">
+                                                <div className="flex-1">
+                                                    <div className="font-medium">{item.name}</div>
+                                                    <div className="text-sm text-gray-600">
+                                                        {section && <span className="mr-2">[{section}]</span>}
+                                                        {category?.name}
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <span className="text-lg">{item.quantity}</span>
+                                                    <div className="w-6 h-6 border-2 border-gray-400 rounded"></div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+
+                            {bought.length > 0 && (
+                                <div>
+                                    <div className="bg-gray-100 px-4 py-2 font-semibold">Bought Items</div>
+                                    {bought.map(item => {
+                                        const category = categories.find(c => c.id === item.categoryId);
+                                        const section = selectedStore !== 'all' ? item.storeData[selectedStore]?.section : null;
+                                        return (
+                                            <div key={item.id} onClick={() => toggleBought(item.id)} className="flex items-center px-4 py-3 border-b bg-white cursor-pointer hover:bg-gray-50 opacity-60">
+                                                <div className="flex-1">
+                                                    <div className="font-medium line-through">{item.name}</div>
+                                                    <div className="text-sm text-gray-600">
+                                                        {section && <span className="mr-2">[{section}]</span>}
+                                                        {category?.name}
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <span className="text-lg">{item.quantity}</span>
+                                                    <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
+                                                        <CheckIcon />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+
+                            {toBuy.length === 0 && bought.length === 0 && (
+                                <div className="flex items-center justify-center h-full text-gray-400">
+                                    Geen items in lijst
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                );
+            };
+
+            const FileTab = () => (
+                <div className="flex flex-col h-full">
+                    <div className="p-4 border-b">
+                        <h1 className="text-xl font-bold">File Management</h1>
+                    </div>
+                    <div className="flex-1 p-4 space-y-4">
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <h3 className="font-semibold mb-2">Import CSV</h3>
+                            <p className="text-sm text-gray-600 mb-3">Import je data vanuit ezShopList CSV export</p>
+                            <label className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded cursor-pointer hover:bg-blue-700">
+                                <UploadIcon />
+                                <span>Kies CSV Bestand</span>
+                                <input type="file" accept=".csv" onChange={handleCSVImport} className="hidden" />
+                            </label>
+                        </div>
+
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <h3 className="font-semibold mb-2">Export CSV</h3>
+                            <p className="text-sm text-gray-600 mb-3">Exporteer je huidige data als CSV backup</p>
+                            <button onClick={handleCSVExport} className="flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 w-full">
+                                <DownloadIcon />
+                                <span>Download CSV</span>
+                            </button>
+                        </div>
+
+                        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                            <h3 className="font-semibold mb-2">Data Opslag</h3>
+                            <div className="text-sm text-gray-600 space-y-1">
+                                <p>• Winkels: {stores.length}</p>
+                                <p>• Categorieën: {categories.length}</p>
+                                <p>• Items: {items.length}</p>
+                                <p className="mt-3 text-xs">Data wordt automatisch opgeslagen op je apparaat</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="flex flex-col h-screen bg-white">
+                    <div className="flex-1 overflow-hidden">
+                        {activeTab === 'stores' && <StoresTab />}
+                        {activeTab === 'items' && <ItemsTab />}
+                        {activeTab === 'list' && <ListTab />}
+                        {activeTab === 'file' && <FileTab />}
+                    </div>
+
+                    <div className="flex border-t bg-white">
+                        <button onClick={() => setActiveTab('stores')} className={`flex-1 flex flex-col items-center py-2 ${activeTab === 'stores' ? 'text-blue-600' : 'text-gray-400'}`}>
+                            <HomeIcon />
+                            <span className="text-xs mt-1">Stores</span>
+                        </button>
+                        <button onClick={() => setActiveTab('items')} className={`flex-1 flex flex-col items-center py-2 ${activeTab === 'items' ? 'text-blue-600' : 'text-gray-400'}`}>
+                            <ListIcon />
+                            <span className="text-xs mt-1">Items</span>
+                        </button>
+                        <button onClick={() => setActiveTab('list')} className={`flex-1 flex flex-col items-center py-2 ${activeTab === 'list' ? 'text-blue-600' : 'text-gray-400'}`}>
+                            <CartIcon />
+                            <span className="text-xs mt-1">List</span>
+                        </button>
+                        <button onClick={() => setActiveTab('file')} className={`flex-1 flex flex-col items-center py-2 ${activeTab === 'file' ? 'text-blue-600' : 'text-gray-400'}`}>
+                            <FolderIcon />
+                            <span className="text-xs mt-1">File</span>
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<EzShopList />, document.getElementById('root'));
+    </script>
+</body>
+</html>d mb-1">Name</label>
+                                        <input type="text" value={showItemDetail.name} onChange={(e) => {
+                                            const updated = { ...showItemDetail, name: e.target.value };
+                                            setShowItemDetail(updated);
+                                            updateItem(updated.id, { name: e.target.value });
+                                        }} className="w-full px-3 py-2 border rounded" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-semibol
