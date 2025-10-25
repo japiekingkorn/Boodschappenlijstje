@@ -468,23 +468,27 @@
                                 {expandedCategories[category.id] && (
                                     <div>
                                         {items.filter(item => item.categoryId === category.id).map(item => (
-                                            <div key={item.id} onClick={() => !editMode && setShowItemDetail(item)} className="flex items-center px-4 py-3 pl-12 border-b bg-white cursor-pointer hover:bg-gray-50">
+                                            <div key={item.id} className="flex items-center px-4 py-3 pl-12 border-b bg-white hover:bg-gray-50">
                                                 {editMode && (
                                                     <button onClick={(e) => { e.stopPropagation(); deleteItem(item.id); }} className="mr-2 text-red-600">
                                                         <MinusIcon />
                                                     </button>
                                                 )}
-                                                <div className="flex-1">{item.name}</div>
+                                                <div className="flex-1 cursor-pointer" onClick={() => !editMode && setShowItemDetail(item)}>{item.name}</div>
                                                 <div className="flex items-center gap-2">
-                                                    <button onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, -1); }} className="w-8 h-8 flex items-center justify-center border rounded">
+                                                    <button onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, -1); }} className="w-8 h-8 flex items-center justify-center border rounded active:bg-gray-200">
                                                         <MinusIcon />
                                                     </button>
                                                     <span className="w-12 text-center">{item.quantity || 0}</span>
-                                                    <button onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, 1); }} className="w-8 h-8 flex items-center justify-center border rounded">
+                                                    <button onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, 1); }} className="w-8 h-8 flex items-center justify-center border rounded active:bg-gray-200">
                                                         <PlusIcon />
                                                     </button>
                                                 </div>
-                                                {!editMode && <ChevronRightIcon />}
+                                                {!editMode && (
+                                                    <button onClick={() => setShowItemDetail(item)} className="ml-2 cursor-pointer">
+                                                        <ChevronRightIcon />
+                                                    </button>
+                                                )}
                                             </div>
                                         ))}
                                     </div>
