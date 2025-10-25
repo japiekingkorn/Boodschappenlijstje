@@ -475,9 +475,16 @@
                             <div className="p-4 border-t bg-white space-y-2">
                                 {showAddCategory ? (
                                     <div className="flex gap-2">
-                                        <input type="text" value={newCategoryName} onChange={(e) => setNewCategoryName(e.target.value)} placeholder="Category name" className="flex-1 px-3 py-2 border rounded" autoFocus />
+                                        <input 
+                                            type="text" 
+                                            value={newCategoryName} 
+                                            onChange={(e) => setNewCategoryName(e.target.value)} 
+                                            placeholder="Category name" 
+                                            className="flex-1 px-3 py-2 border rounded" 
+                                            autoFocus 
+                                        />
                                         <button onClick={addCategory} className="px-4 py-2 bg-blue-600 text-white rounded">Add</button>
-                                        <button onClick={() => setShowAddCategory(false)} className="px-4 py-2 border rounded">Cancel</button>
+                                        <button onClick={() => { setShowAddCategory(false); setNewCategoryName(''); }} className="px-4 py-2 border rounded">Cancel</button>
                                     </div>
                                 ) : (
                                     <button onClick={() => setShowAddCategory(true)} className="w-full py-2 border-2 border-dashed rounded flex items-center justify-center gap-2 text-blue-600">
@@ -485,19 +492,32 @@
                                     </button>
                                 )}
 
-                                {showAddItem ? (
-                                    <div className="space-y-2">
-                                        <input type="text" value={newItemName} onChange={(e) => setNewItemName(e.target.value)} placeholder="Item name" className="w-full px-3 py-2 border rounded" />
-                                        <select value={newItemCategory} onChange={(e) => setNewItemCategory(e.target.value)} className="w-full px-3 py-2 border rounded">
+                                {showAddItem && (
+                                    <div className="space-y-2 bg-green-50 p-3 rounded border border-green-200">
+                                        <input 
+                                            type="text" 
+                                            value={newItemName} 
+                                            onChange={(e) => setNewItemName(e.target.value)} 
+                                            placeholder="Item name" 
+                                            className="w-full px-3 py-2 border rounded"
+                                            autoFocus
+                                        />
+                                        <select 
+                                            value={newItemCategory} 
+                                            onChange={(e) => setNewItemCategory(e.target.value)} 
+                                            className="w-full px-3 py-2 border rounded"
+                                        >
                                             <option value="">Select category</option>
                                             {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
                                         </select>
                                         <div className="flex gap-2">
-                                            <button onClick={addItem} className="flex-1 py-2 bg-blue-600 text-white rounded">Add Item</button>
-                                            <button onClick={() => setShowAddItem(false)} className="flex-1 py-2 border rounded">Cancel</button>
+                                            <button onClick={addItem} className="flex-1 py-2 bg-green-600 text-white rounded">Add Item</button>
+                                            <button onClick={() => { setShowAddItem(false); setNewItemName(''); setNewItemCategory(''); }} className="flex-1 py-2 border rounded bg-white">Cancel</button>
                                         </div>
                                     </div>
-                                ) : (
+                                )}
+
+                                {!showAddItem && (
                                     <button onClick={() => setShowAddItem(true)} className="w-full py-2 border-2 border-dashed rounded flex items-center justify-center gap-2 text-green-600">
                                         <PlusIcon /> <span>Add Item</span>
                                     </button>
