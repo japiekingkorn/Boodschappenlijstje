@@ -38,7 +38,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useRef } = React;
 
         const EzShopList = () => {
             const [activeTab, setActiveTab] = useState('stores');
@@ -447,8 +447,28 @@
                     )}
                 </div>
             );
+        };
 
-            const ItemsTab = () => (
+            const ItemsTab = () => {
+                const scrollRef = useRef(null);
+                const scrollPositionRef = useRef(0);
+
+                // Save scroll position before update
+                const handleQuantityChange = (itemId, change) => {
+                    if (scrollRef.current) {
+                        scrollPositionRef.current = scrollRef.current.scrollTop;
+                    }
+                    updateQuantity(itemId, change);
+                };
+
+                // Restore scroll position after update
+                useEffect(() => {
+                    if (scrollRef.current && scrollPositionRef.current > 0) {
+                        scrollRef.current.scrollTop = scrollPositionRef.current;
+                    }
+                }, [items]);
+
+                return (
                 <div className="flex flex-col h-full">
                     <div className="flex justify-between items-center p-4 border-b">
                         <h1 className="text-xl font-bold">Items</h1>
@@ -457,7 +477,7 @@
                         </button>
                     </div>
 
-                    <div className="flex-1 overflow-auto">
+                    <div ref={scrollRef} className="flex-1 overflow-auto">
                         {categories.map(category => (
                             <div key={category.id} className="border-b">
                                 <div onClick={() => toggleCategory(category.id)} className="flex items-center px-4 py-3 bg-gray-50 cursor-pointer hover:bg-gray-100">
@@ -481,11 +501,11 @@
                                                 )}
                                                 <div className="flex-1 cursor-pointer" onClick={() => !editMode && setShowItemDetail(item)}>{item.name}</div>
                                                 <div className="flex items-center gap-2">
-                                                    <button onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, -1); }} className="w-8 h-8 flex items-center justify-center border rounded active:bg-gray-200">
+                                                    <button onClick={(e) => { e.stopPropagation(); handleQuantityChange(item.id, -1); }} className="w-8 h-8 flex items-center justify-center border rounded active:bg-gray-200">
                                                         <MinusIcon />
                                                     </button>
                                                     <span className="w-12 text-center">{item.quantity || 0}</span>
-                                                    <button onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, 1); }} className="w-8 h-8 flex items-center justify-center border rounded active:bg-gray-200">
+                                                    <button onClick={(e) => { e.stopPropagation(); handleQuantityChange(item.id, 1); }} className="w-8 h-8 flex items-center justify-center border rounded active:bg-gray-200">
                                                         <PlusIcon />
                                                     </button>
                                                 </div>
