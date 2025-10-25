@@ -492,7 +492,11 @@
                                     </button>
                                 )}
 
-                                {showAddItem && (
+                                {!showAddItem ? (
+                                    <button onClick={() => setShowAddItem(true)} className="w-full py-2 border-2 border-dashed rounded flex items-center justify-center gap-2 text-green-600">
+                                        <PlusIcon /> <span>Add Item</span>
+                                    </button>
+                                ) : (
                                     <div className="space-y-2 bg-green-50 p-3 rounded border border-green-200">
                                         <input 
                                             type="text" 
@@ -515,12 +519,6 @@
                                             <button onClick={() => { setShowAddItem(false); setNewItemName(''); setNewItemCategory(''); }} className="flex-1 py-2 border rounded bg-white">Cancel</button>
                                         </div>
                                     </div>
-                                )}
-
-                                {!showAddItem && (
-                                    <button onClick={() => setShowAddItem(true)} className="w-full py-2 border-2 border-dashed rounded flex items-center justify-center gap-2 text-green-600">
-                                        <PlusIcon /> <span>Add Item</span>
-                                    </button>
                                 )}
                             </div>
                         )}
