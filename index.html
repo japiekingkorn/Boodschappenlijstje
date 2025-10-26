@@ -57,6 +57,7 @@
             const [newItemCategory, setNewItemCategory] = useState('');
             const [itemsViewMode, setItemsViewMode] = useState('categories'); // 'categories' or 'alphabetical'
             const [itemsSearchQuery, setItemsSearchQuery] = useState('');
+            const [editingItem, setEditingItem] = useState(null);
 
             useEffect(() => {
                 try {
@@ -130,6 +131,11 @@
             const deleteItem = (id) => {
                 saveItems(items.filter(i => i.id !== id));
                 setShowItemDetail(null);
+            };
+
+            const openItemDetail = (item) => {
+                openItemDetail(item);
+                setEditingItem(null);
             };
 
             const updateItem = (id, updates) => {
@@ -496,7 +502,7 @@
                                                                     <MinusIcon />
                                                                 </button>
                                                             )}
-                                                            <div className="flex-1 cursor-pointer" onClick={() => !editMode && setShowItemDetail(item)}>{item.name}</div>
+                                                            <div className="flex-1 cursor-pointer" onClick={() => !editMode && openItemDetail(item)}>{item.name}</div>
                                                             <div className="flex items-center gap-2">
                                                                 <button onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, -1); }} className="w-8 h-8 flex items-center justify-center border rounded active:bg-gray-200">
                                                                     <MinusIcon />
@@ -507,7 +513,7 @@
                                                                 </button>
                                                             </div>
                                                             {!editMode && (
-                                                                <button onClick={() => setShowItemDetail(item)} className="ml-2 cursor-pointer">
+                                                                <button onClick={() => openItemDetail(item)} className="ml-2 cursor-pointer">
                                                                     <ChevronRightIcon />
                                                                 </button>
                                                             )}
@@ -529,7 +535,7 @@
                                                         <MinusIcon />
                                                     </button>
                                                 )}
-                                                <div className="flex-1 cursor-pointer" onClick={() => !editMode && setShowItemDetail(item)}>
+                                                <div className="flex-1 cursor-pointer" onClick={() => !editMode && openItemDetail(item)}>
                                                     <div className="font-medium">{item.name}</div>
                                                     <div className="text-sm text-gray-600">{category?.name}</div>
                                                 </div>
@@ -543,7 +549,7 @@
                                                     </button>
                                                 </div>
                                                 {!editMode && (
-                                                    <button onClick={() => setShowItemDetail(item)} className="ml-2 cursor-pointer">
+                                                    <button onClick={() => openItemDetail(item)} className="ml-2 cursor-pointer">
                                                         <ChevronRightIcon />
                                                     </button>
                                                 )}
@@ -614,19 +620,44 @@
 
                         {showItemDetail && (
                             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                                <div className="bg-white rounded-lg w-full max-w-md max-h-[80vh] overflow-auto">
+                                <div className="bg-white rounded-lg w-full max-w-md max-h-[80vh] flex flex-col">
                                     <div className="flex justify-between items-center p-4 border-b">
                                         <h2 className="text-lg font-bold">Item Details</h2>
-                                        <button onClick={() => setShowItemDetail(null)} className="text-gray-600"><XIcon /></button>
+                                        <div className="flex gap-2">
+                                            <button 
+                                                onClick={() => {
+                                                    if (editingItem) {
+                                                        updateItem(showItemDetail.id, editingItem);
+                                                    }
+                                                    setShowItemDetail(null);
+                                                    setEditingItem(null);
+                                                }} 
+                                                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                                            >
+                                                Save
+                                            </button>
+                                            <button 
+                                                onClick={() => {
+                                                    setShowItemDetail(null);
+                                                    setEditingItem(null);
+                                                }} 
+                                                className="text-gray-600"
+                                            >
+                                                <XIcon />
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div className="p-4 space-y-4">
+                                    <div className="p-4 space-y-4 overflow-auto">
                                         <div>
                                             <label className="block text-sm font-semibold mb-1">Name</label>
                                             <input 
                                                 type="text" 
-                                                defaultValue={showItemDetail.name} 
-                                                onBlur={(e) => {
-                                                    updateItem(showItemDetail.id, { name: e.target.value });
+                                                value={editingItem?.name ?? showItemDetail.name}
+                                                onChange={(e) => {
+                                                    setEditingItem({
+                                                        ...(editingItem || {}),
+                                                        name: e.target.value
+                                                    });
                                                 }} 
                                                 className="w-full px-3 py-2 border rounded" 
                                             />
@@ -634,9 +665,12 @@
                                         <div>
                                             <label className="block text-sm font-semibold mb-1">Category</label>
                                             <select 
-                                                defaultValue={showItemDetail.categoryId} 
+                                                value={editingItem?.categoryId ?? showItemDetail.categoryId}
                                                 onChange={(e) => {
-                                                    updateItem(showItemDetail.id, { categoryId: e.target.value });
+                                                    setEditingItem({
+                                                        ...(editingItem || {}),
+                                                        categoryId: e.target.value
+                                                    });
                                                 }} 
                                                 className="w-full px-3 py-2 border rounded"
                                             >
@@ -646,20 +680,24 @@
                                         <div>
                                             <label className="block text-sm font-semibold mb-2">Store Secties</label>
                                             {stores.map(store => {
-                                                const storeData = showItemDetail.storeData[store.id] || {};
+                                                const currentStoreData = editingItem?.storeData ?? showItemDetail.storeData;
+                                                const storeData = currentStoreData[store.id] || {};
                                                 return (
                                                     <div key={store.id} className="mb-2">
                                                         <label className="text-sm text-gray-600">{store.name}</label>
                                                         <select 
-                                                            defaultValue={storeData.section || ''} 
+                                                            value={storeData.section || ''}
                                                             onChange={(e) => {
-                                                                const updated = { ...showItemDetail };
+                                                                const newStoreData = { ...(currentStoreData || {}) };
                                                                 if (e.target.value) {
-                                                                    updated.storeData[store.id] = { section: e.target.value };
+                                                                    newStoreData[store.id] = { section: e.target.value };
                                                                 } else {
-                                                                    delete updated.storeData[store.id];
+                                                                    delete newStoreData[store.id];
                                                                 }
-                                                                updateItem(showItemDetail.id, { storeData: updated.storeData });
+                                                                setEditingItem({
+                                                                    ...(editingItem || {}),
+                                                                    storeData: newStoreData
+                                                                });
                                                             }} 
                                                             className="w-full px-3 py-1 border rounded text-sm"
                                                         >
