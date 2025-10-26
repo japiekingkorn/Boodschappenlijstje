@@ -141,11 +141,27 @@
             const [searchValue, setSearchValue] = React.useState('');
             const [viewMode, setViewMode] = React.useState('categories');
             const [isEditMode, setIsEditMode] = React.useState(false);
+            const timeoutRef = React.useRef(null);
             
             const handleSearchChange = (e) => {
                 const value = e.target.value;
                 setSearchValue(value);
-                onSearchChange(value);
+                
+                // Debounce the callback to parent
+                if (timeoutRef.current) {
+                    clearTimeout(timeoutRef.current);
+                }
+                timeoutRef.current = setTimeout(() => {
+                    onSearchChange(value);
+                }, 200);
+            };
+            
+            const handleClear = () => {
+                setSearchValue('');
+                if (timeoutRef.current) {
+                    clearTimeout(timeoutRef.current);
+                }
+                onSearchChange('');
             };
             
             const handleModeChange = (mode) => {
@@ -178,10 +194,7 @@
                         />
                         {searchValue && (
                             <button 
-                                onClick={() => {
-                                    setSearchValue('');
-                                    onSearchChange('');
-                                }}
+                                onClick={handleClear}
                                 type="button"
                                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                             >
