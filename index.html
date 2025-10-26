@@ -136,28 +136,42 @@
 
         const XIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>;
 
-        // Completely isolated search component
+        // Use native DOM events to prevent keyboard dismissal
         function ItemsSearchBar({ onSearchChange, onModeChange, onEditToggle }) {
-            const [searchValue, setSearchValue] = React.useState('');
+            const inputRef = React.useRef(null);
             const [viewMode, setViewMode] = React.useState('categories');
             const [isEditMode, setIsEditMode] = React.useState(false);
             const timeoutRef = React.useRef(null);
             
-            const handleSearchChange = (e) => {
-                const value = e.target.value;
-                setSearchValue(value);
+            React.useEffect(() => {
+                const input = inputRef.current;
+                if (!input) return;
                 
-                // Debounce the callback to parent
-                if (timeoutRef.current) {
-                    clearTimeout(timeoutRef.current);
-                }
-                timeoutRef.current = setTimeout(() => {
-                    onSearchChange(value);
-                }, 200);
-            };
+                const handleInput = (e) => {
+                    const value = e.target.value;
+                    
+                    // Debounce the callback
+                    if (timeoutRef.current) {
+                        clearTimeout(timeoutRef.current);
+                    }
+                    timeoutRef.current = setTimeout(() => {
+                        onSearchChange(value);
+                    }, 200);
+                };
+                
+                input.addEventListener('input', handleInput);
+                return () => {
+                    input.removeEventListener('input', handleInput);
+                    if (timeoutRef.current) {
+                        clearTimeout(timeoutRef.current);
+                    }
+                };
+            }, [onSearchChange]);
             
             const handleClear = () => {
-                setSearchValue('');
+                if (inputRef.current) {
+                    inputRef.current.value = '';
+                }
                 if (timeoutRef.current) {
                     clearTimeout(timeoutRef.current);
                 }
@@ -185,22 +199,20 @@
                     
                     <div className="relative">
                         <input
+                            ref={inputRef}
                             type="text"
-                            inputMode="text"
                             placeholder="Zoek items..."
-                            value={searchValue}
-                            onChange={handleSearchChange}
+                            defaultValue=""
                             className="w-full px-4 py-2 pr-10 border rounded-lg"
                         />
-                        {searchValue && (
-                            <button 
-                                onClick={handleClear}
-                                type="button"
-                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                            >
-                                ✕
-                            </button>
-                        )}
+                        <button 
+                            onClick={handleClear}
+                            type="button"
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        >
+                            ✕
+                        </button>
+                    </div>
                     </div>
 
                     <div className="flex gap-2">
