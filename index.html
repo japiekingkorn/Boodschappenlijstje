@@ -213,7 +213,6 @@
                             ✕
                         </button>
                     </div>
-                    </div>
 
                     <div className="flex gap-2">
                         <button 
@@ -635,6 +634,18 @@
                     : items;
 
                 const sortedAlphabetically = [...filteredItems].sort((a, b) => a.name.localeCompare(b.name));
+
+                const handleSearchChange = (value) => {
+                    setItemsSearchQuery(value);
+                };
+
+                const handleModeChange = (mode) => {
+                    setItemsViewMode(mode);
+                };
+
+                const handleEditToggle = () => {
+                    setEditMode(!editMode);
+                };
 
                 return (
                     <div className="flex flex-col h-full">
