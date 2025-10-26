@@ -136,9 +136,11 @@
 
         const XIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>;
 
-        // Completely isolated search component that never re-renders from parent
-        function ItemsSearchBar({ onSearchChange, onModeChange, currentMode, onEditToggle, editMode }) {
+        // Completely isolated search component
+        function ItemsSearchBar({ onSearchChange, onModeChange, onEditToggle }) {
             const [searchValue, setSearchValue] = React.useState('');
+            const [viewMode, setViewMode] = React.useState('categories');
+            const [isEditMode, setIsEditMode] = React.useState(false);
             
             const handleSearchChange = (e) => {
                 const value = e.target.value;
@@ -146,12 +148,22 @@
                 onSearchChange(value);
             };
             
+            const handleModeChange = (mode) => {
+                setViewMode(mode);
+                onModeChange(mode);
+            };
+            
+            const handleEditToggle = () => {
+                setIsEditMode(!isEditMode);
+                onEditToggle();
+            };
+            
             return (
                 <div className="p-4 border-b space-y-3">
                     <div className="flex justify-between items-center">
                         <h1 className="text-xl font-bold">Items</h1>
-                        <button onClick={onEditToggle} className="px-4 py-2 text-blue-600">
-                            {editMode ? 'Done' : 'Edit'}
+                        <button onClick={handleEditToggle} className="px-4 py-2 text-blue-600">
+                            {isEditMode ? 'Done' : 'Edit'}
                         </button>
                     </div>
                     
@@ -180,14 +192,14 @@
 
                     <div className="flex gap-2">
                         <button 
-                            onClick={() => onModeChange('categories')}
-                            className={`flex-1 px-4 py-2 rounded ${currentMode === 'categories' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+                            onClick={() => handleModeChange('categories')}
+                            className={`flex-1 px-4 py-2 rounded ${viewMode === 'categories' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
                         >
                             Categories
                         </button>
                         <button 
-                            onClick={() => onModeChange('alphabetical')}
-                            className={`flex-1 px-4 py-2 rounded ${currentMode === 'alphabetical' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+                            onClick={() => handleModeChange('alphabetical')}
+                            className={`flex-1 px-4 py-2 rounded ${viewMode === 'alphabetical' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
                         >
                             Items Only
                         </button>
@@ -195,9 +207,6 @@
                 </div>
             );
         }
-
-        // Memoize the search bar so it never re-renders unless its own props change
-        const MemoizedItemsSearchBar = React.memo(ItemsSearchBar);
 
         function EzShopList() {
             const [activeTab, setActiveTab] = useState('stores');
@@ -218,6 +227,19 @@
             const [newItemCategory, setNewItemCategory] = useState('');
             const [itemsViewMode, setItemsViewMode] = useState('categories'); // 'categories' or 'alphabetical'
             const [itemsSearchQuery, setItemsSearchQuery] = useState('');
+
+            // Use useCallback to create stable function references
+            const handleSearchChange = React.useCallback((value) => {
+                setItemsSearchQuery(value);
+            }, []);
+
+            const handleModeChange = React.useCallback((mode) => {
+                setItemsViewMode(mode);
+            }, []);
+
+            const handleEditToggle = React.useCallback(() => {
+                setEditMode(prev => !prev);
+            }, []);
 
             useEffect(() => {
                 try {
@@ -591,12 +613,10 @@
 
                 return (
                     <div className="flex flex-col h-full">
-                        <MemoizedItemsSearchBar 
-                            onSearchChange={setItemsSearchQuery}
-                            onModeChange={setItemsViewMode}
-                            currentMode={itemsViewMode}
-                            onEditToggle={() => setEditMode(!editMode)}
-                            editMode={editMode}
+                        <ItemsSearchBar 
+                            onSearchChange={handleSearchChange}
+                            onModeChange={handleModeChange}
+                            onEditToggle={handleEditToggle}
                         />
 
                         <div className="flex-1 overflow-auto">
