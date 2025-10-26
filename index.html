@@ -419,17 +419,64 @@
             }
 
             function ItemsTab() {
-                return (
-                    <div className="flex flex-col h-full">
-                        <div className="flex justify-between items-center p-4 border-b">
-                            <h1 className="text-xl font-bold">Items</h1>
-                            <button onClick={() => setEditMode(!editMode)} className="px-4 py-2 text-blue-600">
-                                {editMode ? 'Done' : 'Edit'}
-                            </button>
-                        </div>
+                const getFilteredItems = () => {
+                    let filteredItems = items;
+                    
+                    // Apply search filter
+                    if (itemsSearchQuery.trim()) {
+                        filteredItems = filteredItems.filter(item => 
+                            item.name.toLowerCase().includes(itemsSearchQuery.toLowerCase())
+                        );
+                    }
+                    
+                    return filteredItems;
+                };
 
-                        <div className="flex-1 overflow-auto">
-                            {categories.map(category => (
+                const renderItemsList = () => {
+                    const filteredItems = getFilteredItems();
+                    
+                    if (itemsViewMode === 'alphabetical') {
+                        // Alphabetical view - all items sorted
+                        const sortedItems = [...filteredItems].sort((a, b) => a.name.localeCompare(b.name));
+                        
+                        return (
+                            <div>
+                                {sortedItems.map(item => (
+                                    <div key={item.id} data-item-id={item.id} className="flex items-center px-4 py-3 border-b bg-white hover:bg-gray-50">
+                                        {editMode && (
+                                            <button onClick={(e) => { e.stopPropagation(); deleteItem(item.id); }} className="mr-2 text-red-600">
+                                                <MinusIcon />
+                                            </button>
+                                        )}
+                                        <div className="flex-1 cursor-pointer" onClick={() => !editMode && setShowItemDetail(item)}>
+                                            {item.name}
+                                            <div className="text-xs text-gray-500">{categories.find(c => c.id === item.categoryId)?.name}</div>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <button onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, -1); }} className="w-8 h-8 flex items-center justify-center border rounded active:bg-gray-200">
+                                                <MinusIcon />
+                                            </button>
+                                            <span className="w-12 text-center item-qty">{item.quantity || 0}</span>
+                                            <button onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, 1); }} className="w-8 h-8 flex items-center justify-center border rounded active:bg-gray-200">
+                                                <PlusIcon />
+                                            </button>
+                                        </div>
+                                        {!editMode && (
+                                            <button onClick={() => setShowItemDetail(item)} className="ml-2 cursor-pointer">
+                                                <ChevronRightIcon />
+                                            </button>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        );
+                    } else {
+                        // Category view
+                        return categories.map(category => {
+                            const categoryItems = filteredItems.filter(item => item.categoryId === category.id);
+                            if (categoryItems.length === 0 && itemsSearchQuery.trim()) return null;
+                            
+                            return (
                                 <div key={category.id} className="border-b">
                                     <div onClick={() => toggleCategory(category.id)} className="flex items-center px-4 py-3 bg-gray-50 cursor-pointer hover:bg-gray-100">
                                         {editMode && (
@@ -439,11 +486,12 @@
                                         )}
                                         {expandedCategories[category.id] ? <ChevronDownIcon /> : <ChevronRightIcon />}
                                         <span className="font-semibold ml-2">{category.name}</span>
+                                        {categoryItems.length > 0 && <span className="ml-2 text-sm text-gray-500">({categoryItems.length})</span>}
                                     </div>
 
                                     {expandedCategories[category.id] && (
                                         <div>
-                                            {items.filter(item => item.categoryId === category.id).map(item => (
+                                            {categoryItems.map(item => (
                                                 <div key={item.id} data-item-id={item.id} className="flex items-center px-4 py-3 pl-12 border-b bg-white hover:bg-gray-50">
                                                     {editMode && (
                                                         <button onClick={(e) => { e.stopPropagation(); deleteItem(item.id); }} className="mr-2 text-red-600">
@@ -470,8 +518,51 @@
                                         </div>
                                     )}
                                 </div>
-                            ))}
+                            );
+                        });
+                    }
+                };
+
+                return (
+                    <div className="flex flex-col h-full">
+                        <div className="flex justify-between items-center p-4 border-b">
+                            <h1 className="text-xl font-bold">Items</h1>
+                            <button onClick={() => setEditMode(!editMode)} className="px-4 py-2 text-blue-600">
+                                {editMode ? 'Done' : 'Edit'}
+                            </button>
                         </div>
+
+                        {/* Search and View Toggle */}
+                        <div className="p-3 border-b bg-gray-50 space-y-2">
+                            <input
+                                type="text"
+                                value={itemsSearchQuery}
+                                onChange={(e) => setItemsSearchQuery(e.target.value)}
+                                placeholder="Zoek items..."
+                                className="w-full px-3 py-2 border rounded"
+                            />
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => setItemsViewMode('categories')}
+                                    className={`flex-1 py-2 rounded ${itemsViewMode === 'categories' ? 'bg-blue-600 text-white' : 'bg-white border'}`}
+                                >
+                                    Categorieën
+                                </button>
+                                <button
+                                    onClick={() => setItemsViewMode('alphabetical')}
+                                    className={`flex-1 py-2 rounded ${itemsViewMode === 'alphabetical' ? 'bg-blue-600 text-white' : 'bg-white border'}`}
+                                >
+                                    Items Only
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="flex-1 overflow-auto">
+                            {renderItemsList()}
+                        </div>
+
+                        {editMode && (
+                            <div className="p-4 border-t bg-white space-y-2">
 
                         {editMode && (
                             <div className="p-4 border-t bg-white space-y-2">
