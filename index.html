@@ -141,7 +141,6 @@
             const inputRef = React.useRef(null);
             const [viewMode, setViewMode] = React.useState('categories');
             const [isEditMode, setIsEditMode] = React.useState(false);
-            const timeoutRef = React.useRef(null);
             
             React.useEffect(() => {
                 const input = inputRef.current;
@@ -149,31 +148,19 @@
                 
                 const handleInput = (e) => {
                     const value = e.target.value;
-                    
-                    // Debounce the callback
-                    if (timeoutRef.current) {
-                        clearTimeout(timeoutRef.current);
-                    }
-                    timeoutRef.current = setTimeout(() => {
-                        onSearchChange(value);
-                    }, 200);
+                    // Direct filtering, no debounce
+                    onSearchChange(value);
                 };
                 
                 input.addEventListener('input', handleInput);
                 return () => {
                     input.removeEventListener('input', handleInput);
-                    if (timeoutRef.current) {
-                        clearTimeout(timeoutRef.current);
-                    }
                 };
             }, [onSearchChange]);
             
             const handleClear = () => {
                 if (inputRef.current) {
                     inputRef.current.value = '';
-                }
-                if (timeoutRef.current) {
-                    clearTimeout(timeoutRef.current);
                 }
                 onSearchChange('');
             };
