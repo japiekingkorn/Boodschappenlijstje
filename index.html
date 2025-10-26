@@ -422,7 +422,6 @@
                 const getFilteredItems = () => {
                     let filteredItems = items;
                     
-                    // Apply search filter
                     if (itemsSearchQuery.trim()) {
                         filteredItems = filteredItems.filter(item => 
                             item.name.toLowerCase().includes(itemsSearchQuery.toLowerCase())
@@ -436,7 +435,6 @@
                     const filteredItems = getFilteredItems();
                     
                     if (itemsViewMode === 'alphabetical') {
-                        // Alphabetical view - all items sorted
                         const sortedItems = [...filteredItems].sort((a, b) => a.name.localeCompare(b.name));
                         
                         return (
@@ -471,7 +469,6 @@
                             </div>
                         );
                     } else {
-                        // Category view
                         return categories.map(category => {
                             const categoryItems = filteredItems.filter(item => item.categoryId === category.id);
                             if (categoryItems.length === 0 && itemsSearchQuery.trim()) return null;
@@ -532,7 +529,6 @@
                             </button>
                         </div>
 
-                        {/* Search and View Toggle */}
                         <div className="p-3 border-b bg-gray-50 space-y-2">
                             <input
                                 type="text"
@@ -563,6 +559,121 @@
 
                         {editMode && (
                             <div className="p-4 border-t bg-white space-y-2">
+                                {showAddCategory ? (
+                                    <div className="flex gap-2">
+                                        <input 
+                                            type="text" 
+                                            value={newCategoryName} 
+                                            onChange={(e) => setNewCategoryName(e.target.value)} 
+                                            placeholder="Category name" 
+                                            className="flex-1 px-3 py-2 border rounded" 
+                                            autoFocus 
+                                        />
+                                        <button onClick={addCategory} className="px-4 py-2 bg-blue-600 text-white rounded">Add</button>
+                                        <button onClick={() => { setShowAddCategory(false); setNewCategoryName(''); }} className="px-4 py-2 border rounded">Cancel</button>
+                                    </div>
+                                ) : (
+                                    <button onClick={() => setShowAddCategory(true)} className="w-full py-2 border-2 border-dashed rounded flex items-center justify-center gap-2 text-blue-600">
+                                        <PlusIcon /> <span>Add Category</span>
+                                    </button>
+                                )}
+
+                                {!showAddItem ? (
+                                    <button onClick={() => setShowAddItem(true)} className="w-full py-2 border-2 border-dashed rounded flex items-center justify-center gap-2 text-green-600">
+                                        <PlusIcon /> <span>Add Item</span>
+                                    </button>
+                                ) : (
+                                    <div className="space-y-2 bg-green-50 p-3 rounded border border-green-200">
+                                        <input 
+                                            type="text" 
+                                            value={newItemName} 
+                                            onChange={(e) => setNewItemName(e.target.value)} 
+                                            placeholder="Item name" 
+                                            className="w-full px-3 py-2 border rounded"
+                                            autoFocus
+                                        />
+                                        <select 
+                                            value={newItemCategory} 
+                                            onChange={(e) => setNewItemCategory(e.target.value)} 
+                                            className="w-full px-3 py-2 border rounded"
+                                        >
+                                            <option value="">Select category</option>
+                                            {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
+                                        </select>
+                                        <div className="flex gap-2">
+                                            <button onClick={addItem} className="flex-1 py-2 bg-green-600 text-white rounded">Add Item</button>
+                                            <button onClick={() => { setShowAddItem(false); setNewItemName(''); setNewItemCategory(''); }} className="flex-1 py-2 border rounded bg-white">Cancel</button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {showItemDetail && (
+                            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                                <div className="bg-white rounded-lg w-full max-w-md max-h-[80vh] overflow-auto">
+                                    <div className="flex justify-between items-center p-4 border-b">
+                                        <h2 className="text-lg font-bold">Item Details</h2>
+                                        <button onClick={() => setShowItemDetail(null)} className="text-gray-600"><XIcon /></button>
+                                    </div>
+                                    <div className="p-4 space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-semibold mb-1">Name</label>
+                                            <input 
+                                                type="text" 
+                                                defaultValue={showItemDetail.name} 
+                                                onBlur={(e) => {
+                                                    updateItem(showItemDetail.id, { name: e.target.value });
+                                                }} 
+                                                className="w-full px-3 py-2 border rounded" 
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-semibold mb-1">Category</label>
+                                            <select 
+                                                defaultValue={showItemDetail.categoryId} 
+                                                onChange={(e) => {
+                                                    updateItem(showItemDetail.id, { categoryId: e.target.value });
+                                                }} 
+                                                className="w-full px-3 py-2 border rounded"
+                                            >
+                                                {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-semibold mb-2">Store Secties</label>
+                                            {stores.map(store => {
+                                                const storeData = showItemDetail.storeData[store.id] || {};
+                                                return (
+                                                    <div key={store.id} className="mb-2">
+                                                        <label className="text-sm text-gray-600">{store.name}</label>
+                                                        <select 
+                                                            defaultValue={storeData.section || ''} 
+                                                            onChange={(e) => {
+                                                                const updated = { ...showItemDetail };
+                                                                if (e.target.value) {
+                                                                    updated.storeData[store.id] = { section: e.target.value };
+                                                                } else {
+                                                                    delete updated.storeData[store.id];
+                                                                }
+                                                                updateItem(showItemDetail.id, { storeData: updated.storeData });
+                                                            }} 
+                                                            className="w-full px-3 py-1 border rounded text-sm"
+                                                        >
+                                                            <option value="">Niet in deze winkel</option>
+                                                            {store.sections.map((section, idx) => <option key={idx} value={section}>{section}</option>)}
+                                                        </select>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                );
+            }
 
                         {editMode && (
                             <div className="p-4 border-t bg-white space-y-2">
