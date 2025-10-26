@@ -136,6 +136,43 @@
 
         const XIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>;
 
+        function SearchInput({ value, onChange, placeholder }) {
+            const [localValue, setLocalValue] = useState(value);
+
+            useEffect(() => {
+                setLocalValue(value);
+            }, [value]);
+
+            const handleChange = (e) => {
+                const newValue = e.target.value;
+                setLocalValue(newValue);
+                onChange(newValue);
+            };
+
+            return (
+                <div className="relative">
+                    <input
+                        type="text"
+                        placeholder={placeholder}
+                        value={localValue}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 pr-10 border rounded-lg"
+                    />
+                    {localValue && (
+                        <button 
+                            onClick={() => {
+                                setLocalValue('');
+                                onChange('');
+                            }}
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        >
+                            ✕
+                        </button>
+                    )}
+                </div>
+            );
+        }
+
         function EzShopList() {
             const [activeTab, setActiveTab] = useState('stores');
             const [stores, setStores] = useState([]);
@@ -536,23 +573,11 @@
                                 </button>
                             </div>
                             
-                            <div className="relative">
-                                <input
-                                    type="text"
-                                    placeholder="Zoek items..."
-                                    value={itemsSearchQuery}
-                                    onChange={(e) => setItemsSearchQuery(e.target.value)}
-                                    className="w-full px-4 py-2 pr-10 border rounded-lg"
-                                />
-                                {itemsSearchQuery && (
-                                    <button 
-                                        onClick={() => setItemsSearchQuery('')}
-                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                                    >
-                                        ✕
-                                    </button>
-                                )}
-                            </div>
+                            <SearchInput 
+                                value={itemsSearchQuery}
+                                onChange={setItemsSearchQuery}
+                                placeholder="Zoek items..."
+                            />
 
                             <div className="flex gap-2">
                                 <button 
