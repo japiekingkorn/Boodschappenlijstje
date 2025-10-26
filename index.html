@@ -135,7 +135,11 @@
 
             const openItemDetail = (item) => {
                 setShowItemDetail(item);
-                setEditingItem(null);
+                setEditingItem({
+                    name: item.name,
+                    categoryId: item.categoryId,
+                    storeData: { ...item.storeData }
+                });
             };
 
             const updateItem = (id, updates) => {
@@ -652,10 +656,10 @@
                                             <label className="block text-sm font-semibold mb-1">Name</label>
                                             <input 
                                                 type="text" 
-                                                value={editingItem?.name ?? showItemDetail.name}
+                                                value={editingItem?.name || ''}
                                                 onChange={(e) => {
                                                     setEditingItem({
-                                                        ...(editingItem || {}),
+                                                        ...editingItem,
                                                         name: e.target.value
                                                     });
                                                 }} 
@@ -665,10 +669,10 @@
                                         <div>
                                             <label className="block text-sm font-semibold mb-1">Category</label>
                                             <select 
-                                                value={editingItem?.categoryId ?? showItemDetail.categoryId}
+                                                value={editingItem?.categoryId || ''}
                                                 onChange={(e) => {
                                                     setEditingItem({
-                                                        ...(editingItem || {}),
+                                                        ...editingItem,
                                                         categoryId: e.target.value
                                                     });
                                                 }} 
@@ -680,22 +684,21 @@
                                         <div>
                                             <label className="block text-sm font-semibold mb-2">Store Secties</label>
                                             {stores.map(store => {
-                                                const currentStoreData = editingItem?.storeData ?? showItemDetail.storeData;
-                                                const storeData = currentStoreData[store.id] || {};
+                                                const storeData = editingItem?.storeData?.[store.id] || {};
                                                 return (
                                                     <div key={store.id} className="mb-2">
                                                         <label className="text-sm text-gray-600">{store.name}</label>
                                                         <select 
                                                             value={storeData.section || ''}
                                                             onChange={(e) => {
-                                                                const newStoreData = { ...(currentStoreData || {}) };
+                                                                const newStoreData = { ...(editingItem?.storeData || {}) };
                                                                 if (e.target.value) {
                                                                     newStoreData[store.id] = { section: e.target.value };
                                                                 } else {
                                                                     delete newStoreData[store.id];
                                                                 }
                                                                 setEditingItem({
-                                                                    ...(editingItem || {}),
+                                                                    ...editingItem,
                                                                     storeData: newStoreData
                                                                 });
                                                             }} 
