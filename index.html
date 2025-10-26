@@ -136,33 +136,56 @@
 
         const XIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>;
 
-        // Use native DOM events to prevent keyboard dismissal
-        function ItemsSearchBar({ onSearchChange, onModeChange, onEditToggle }) {
-            const inputRef = React.useRef(null);
+        // Completely bypass React for search - use pure DOM manipulation
+        function ItemsSearchBar({ onModeChange, onEditToggle }) {
             const [viewMode, setViewMode] = React.useState('categories');
             const [isEditMode, setIsEditMode] = React.useState(false);
+            const inputRef = React.useRef(null);
             
             React.useEffect(() => {
                 const input = inputRef.current;
                 if (!input) return;
                 
                 const handleInput = (e) => {
-                    const value = e.target.value;
-                    // Direct filtering, no debounce
-                    onSearchChange(value);
+                    const query = e.target.value.toLowerCase();
+                    
+                    // Filter by directly hiding/showing DOM elements
+                    const allItems = document.querySelectorAll('[data-item-name]');
+                    const allCategories = document.querySelectorAll('[data-category-section]');
+                    
+                    allItems.forEach(item => {
+                        const name = item.getAttribute('data-item-name').toLowerCase();
+                        if (!query || name.includes(query)) {
+                            item.style.display = '';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                    
+                    // Hide empty categories
+                    allCategories.forEach(category => {
+                        const visibleItems = category.querySelectorAll('[data-item-name]:not([style*="display: none"])');
+                        if (query && visibleItems.length === 0) {
+                            category.style.display = 'none';
+                        } else {
+                            category.style.display = '';
+                        }
+                    });
                 };
                 
                 input.addEventListener('input', handleInput);
-                return () => {
-                    input.removeEventListener('input', handleInput);
-                };
-            }, [onSearchChange]);
+                return () => input.removeEventListener('input', handleInput);
+            }, []);
             
             const handleClear = () => {
                 if (inputRef.current) {
                     inputRef.current.value = '';
+                    // Show all items again
+                    const allItems = document.querySelectorAll('[data-item-name]');
+                    const allCategories = document.querySelectorAll('[data-category-section]');
+                    allItems.forEach(item => item.style.display = '');
+                    allCategories.forEach(cat => cat.style.display = '');
                 }
-                onSearchChange('');
             };
             
             const handleModeChange = (mode) => {
@@ -616,15 +639,8 @@
             }
 
             function ItemsTab() {
-                const filteredItems = itemsSearchQuery 
-                    ? items.filter(item => item.name.toLowerCase().includes(itemsSearchQuery.toLowerCase()))
-                    : items;
-
-                const sortedAlphabetically = [...filteredItems].sort((a, b) => a.name.localeCompare(b.name));
-
-                const handleSearchChange = (value) => {
-                    setItemsSearchQuery(value);
-                };
+                // NO FILTERING - show all items and let DOM manipulation handle visibility
+                const sortedAlphabetically = [...items].sort((a, b) => a.name.localeCompare(b.name));
 
                 const handleModeChange = (mode) => {
                     setItemsViewMode(mode);
@@ -637,7 +653,6 @@
                 return (
                     <div className="flex flex-col h-full">
                         <ItemsSearchBar 
-                            onSearchChange={handleSearchChange}
                             onModeChange={handleModeChange}
                             onEditToggle={handleEditToggle}
                         />
@@ -645,11 +660,10 @@
                         <div className="flex-1 overflow-auto">
                             {itemsViewMode === 'categories' ? (
                                 categories.map(category => {
-                                    const categoryItems = filteredItems.filter(item => item.categoryId === category.id);
-                                    if (categoryItems.length === 0 && itemsSearchQuery) return null;
+                                    const categoryItems = items.filter(item => item.categoryId === category.id);
                                     
                                     return (
-                                        <div key={category.id} className="border-b">
+                                        <div key={category.id} className="border-b" data-category-section>
                                             <div onClick={() => toggleCategory(category.id)} className="flex items-center px-4 py-3 bg-gray-50 cursor-pointer hover:bg-gray-100">
                                                 {editMode && (
                                                     <button onClick={(e) => { e.stopPropagation(); deleteCategory(category.id); }} className="mr-2 text-red-600">
@@ -663,7 +677,7 @@
                                             {expandedCategories[category.id] && (
                                                 <div>
                                                     {categoryItems.map(item => (
-                                                        <div key={item.id} data-item-id={item.id} className="flex items-center px-4 py-3 pl-12 border-b bg-white hover:bg-gray-50">
+                                                        <div key={item.id} data-item-id={item.id} data-item-name={item.name} className="flex items-center px-4 py-3 pl-12 border-b bg-white hover:bg-gray-50">
                                                             {editMode && (
                                                                 <button onClick={(e) => { e.stopPropagation(); deleteItem(item.id); }} className="mr-2 text-red-600">
                                                                     <MinusIcon />
@@ -696,7 +710,7 @@
                                     {sortedAlphabetically.map(item => {
                                         const category = categories.find(c => c.id === item.categoryId);
                                         return (
-                                            <div key={item.id} data-item-id={item.id} className="flex items-center px-4 py-3 border-b bg-white hover:bg-gray-50">
+                                            <div key={item.id} data-item-id={item.id} data-item-name={item.name} className="flex items-center px-4 py-3 border-b bg-white hover:bg-gray-50">
                                                 {editMode && (
                                                     <button onClick={(e) => { e.stopPropagation(); deleteItem(item.id); }} className="mr-2 text-red-600">
                                                         <MinusIcon />
@@ -723,12 +737,6 @@
                                             </div>
                                         );
                                     })}
-                                </div>
-                            )}
-
-                            {filteredItems.length === 0 && (
-                                <div className="flex items-center justify-center h-full text-gray-400">
-                                    {itemsSearchQuery ? 'Geen items gevonden' : 'Geen items'}
                                 </div>
                             )}
                         </div>
