@@ -38,6 +38,104 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
+        function ItemDetailModal({ item, stores, categories, onSave, onClose }) {
+            const [editingItem, setEditingItem] = useState({
+                name: item.name,
+                categoryId: item.categoryId,
+                storeData: { ...item.storeData }
+            });
+
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-lg w-full max-w-md max-h-[80vh] flex flex-col">
+                        <div className="flex justify-between items-center p-4 border-b">
+                            <h2 className="text-lg font-bold">Item Details</h2>
+                            <div className="flex gap-2">
+                                <button 
+                                    onClick={() => {
+                                        onSave(item.id, editingItem);
+                                        onClose();
+                                    }} 
+                                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                                >
+                                    Save
+                                </button>
+                                <button 
+                                    onClick={onClose}
+                                    className="text-gray-600"
+                                >
+                                    <XIcon />
+                                </button>
+                            </div>
+                        </div>
+                        <div className="p-4 space-y-4 overflow-auto">
+                            <div>
+                                <label className="block text-sm font-semibold mb-1">Name</label>
+                                <input 
+                                    type="text" 
+                                    value={editingItem.name}
+                                    onChange={(e) => {
+                                        setEditingItem({
+                                            ...editingItem,
+                                            name: e.target.value
+                                        });
+                                    }} 
+                                    className="w-full px-3 py-2 border rounded" 
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold mb-1">Category</label>
+                                <select 
+                                    value={editingItem.categoryId}
+                                    onChange={(e) => {
+                                        setEditingItem({
+                                            ...editingItem,
+                                            categoryId: e.target.value
+                                        });
+                                    }} 
+                                    className="w-full px-3 py-2 border rounded"
+                                >
+                                    {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold mb-2">Store Secties</label>
+                                {stores.map(store => {
+                                    const storeData = editingItem.storeData[store.id] || {};
+                                    return (
+                                        <div key={store.id} className="mb-2">
+                                            <label className="text-sm text-gray-600">{store.name}</label>
+                                            <select 
+                                                value={storeData.section || ''}
+                                                onChange={(e) => {
+                                                    const newStoreData = { ...editingItem.storeData };
+                                                    if (e.target.value) {
+                                                        newStoreData[store.id] = { section: e.target.value };
+                                                    } else {
+                                                        delete newStoreData[store.id];
+                                                    }
+                                                    setEditingItem({
+                                                        ...editingItem,
+                                                        storeData: newStoreData
+                                                    });
+                                                }} 
+                                                className="w-full px-3 py-1 border rounded text-sm"
+                                            >
+                                                <option value="">Niet in deze winkel</option>
+                                                {store.sections.map((section, idx) => <option key={idx} value={section}>{section}</option>)}
+                                            </select>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const XIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>;
+
         function EzShopList() {
             const [activeTab, setActiveTab] = useState('stores');
             const [stores, setStores] = useState([]);
@@ -57,7 +155,6 @@
             const [newItemCategory, setNewItemCategory] = useState('');
             const [itemsViewMode, setItemsViewMode] = useState('categories'); // 'categories' or 'alphabetical'
             const [itemsSearchQuery, setItemsSearchQuery] = useState('');
-            const [editingItem, setEditingItem] = useState(null);
 
             useEffect(() => {
                 try {
@@ -135,11 +232,6 @@
 
             const openItemDetail = (item) => {
                 setShowItemDetail(item);
-                setEditingItem({
-                    name: item.name,
-                    categoryId: item.categoryId,
-                    storeData: { ...item.storeData }
-                });
             };
 
             const updateItem = (id, updates) => {
@@ -320,7 +412,6 @@
             const CheckIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>;
             const ChevronRightIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>;
             const ChevronDownIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>;
-            const XIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>;
             const TrashIcon = () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>;
             const UploadIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>;
             const DownloadIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>;
@@ -623,97 +714,13 @@
                         )}
 
                         {showItemDetail && (
-                            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                                <div className="bg-white rounded-lg w-full max-w-md max-h-[80vh] flex flex-col">
-                                    <div className="flex justify-between items-center p-4 border-b">
-                                        <h2 className="text-lg font-bold">Item Details</h2>
-                                        <div className="flex gap-2">
-                                            <button 
-                                                onClick={() => {
-                                                    if (editingItem) {
-                                                        updateItem(showItemDetail.id, editingItem);
-                                                    }
-                                                    setShowItemDetail(null);
-                                                    setEditingItem(null);
-                                                }} 
-                                                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                                            >
-                                                Save
-                                            </button>
-                                            <button 
-                                                onClick={() => {
-                                                    setShowItemDetail(null);
-                                                    setEditingItem(null);
-                                                }} 
-                                                className="text-gray-600"
-                                            >
-                                                <XIcon />
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div className="p-4 space-y-4 overflow-auto">
-                                        <div>
-                                            <label className="block text-sm font-semibold mb-1">Name</label>
-                                            <input 
-                                                type="text" 
-                                                value={editingItem?.name || ''}
-                                                onChange={(e) => {
-                                                    setEditingItem({
-                                                        ...editingItem,
-                                                        name: e.target.value
-                                                    });
-                                                }} 
-                                                className="w-full px-3 py-2 border rounded" 
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-semibold mb-1">Category</label>
-                                            <select 
-                                                value={editingItem?.categoryId || ''}
-                                                onChange={(e) => {
-                                                    setEditingItem({
-                                                        ...editingItem,
-                                                        categoryId: e.target.value
-                                                    });
-                                                }} 
-                                                className="w-full px-3 py-2 border rounded"
-                                            >
-                                                {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-semibold mb-2">Store Secties</label>
-                                            {stores.map(store => {
-                                                const storeData = editingItem?.storeData?.[store.id] || {};
-                                                return (
-                                                    <div key={store.id} className="mb-2">
-                                                        <label className="text-sm text-gray-600">{store.name}</label>
-                                                        <select 
-                                                            value={storeData.section || ''}
-                                                            onChange={(e) => {
-                                                                const newStoreData = { ...(editingItem?.storeData || {}) };
-                                                                if (e.target.value) {
-                                                                    newStoreData[store.id] = { section: e.target.value };
-                                                                } else {
-                                                                    delete newStoreData[store.id];
-                                                                }
-                                                                setEditingItem({
-                                                                    ...editingItem,
-                                                                    storeData: newStoreData
-                                                                });
-                                                            }} 
-                                                            className="w-full px-3 py-1 border rounded text-sm"
-                                                        >
-                                                            <option value="">Niet in deze winkel</option>
-                                                            {store.sections.map((section, idx) => <option key={idx} value={section}>{section}</option>)}
-                                                        </select>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <ItemDetailModal
+                                item={showItemDetail}
+                                stores={stores}
+                                categories={categories}
+                                onSave={(id, updates) => updateItem(id, updates)}
+                                onClose={() => setShowItemDetail(null)}
+                            />
                         )}
                     </div>
                 );
