@@ -442,27 +442,16 @@
             // Calculate number of stores to visit (stores that have items with quantity > 0)
             const getStoresToVisitCount = () => {
                 const storesWithItems = new Set();
-                const validStoreIds = new Set(stores.map(s => s.id));
                 
                 items.forEach(item => {
                     if (item.quantity > 0 && item.storeData) {
-                        // Only count stores that EXIST in the stores list
                         Object.keys(item.storeData).forEach(storeId => {
-                            // Only add if:
-                            // 1. storeData has actual content (not undefined/null)
-                            // 2. The store still exists in the stores array
-                            if (item.storeData[storeId] && validStoreIds.has(storeId)) {
+                            // Just add any storeId that has data
+                            if (item.storeData[storeId] && typeof item.storeData[storeId] === 'object') {
                                 storesWithItems.add(storeId);
                             }
                         });
                     }
-                });
-                
-                // Debug log (remove later)
-                console.log('🔍 Store count debug:', {
-                    totalStores: stores.length,
-                    storesWithItems: Array.from(storesWithItems),
-                    count: storesWithItems.size
                 });
                 
                 return storesWithItems.size;
@@ -633,10 +622,12 @@
                 return (
                     <div className="flex flex-col h-full">
                         <div className="flex justify-between items-center px-4 pt-6 pb-4 border-b" style={{paddingTop: 'max(1.5rem, env(safe-area-inset-top))'}}>
-                            <div>
+                            <div className="flex-1">
                                 <h1 className="text-xl font-bold">Stores</h1>
                                 <div className="text-xs text-gray-500 mt-1">
-                                    Debug: {getStoresToVisitCount()} stores with items
+                                    Badge count: {getStoresToVisitCount()} | 
+                                    Items with qty: {items.filter(i => i.quantity > 0).length} | 
+                                    Total items: {items.length}
                                 </div>
                             </div>
                             <button onClick={() => setStoresEditMode(!storesEditMode)} className="px-4 py-2 text-blue-600 min-h-[44px]">
