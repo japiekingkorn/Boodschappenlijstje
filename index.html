@@ -407,12 +407,14 @@
             };
 
             // Calculate number of stores to visit (stores that have items with quantity > 0)
+            // Excludes 'all' as it's not a real store
             const getStoresToVisitCount = () => {
                 const storesWithItems = new Set();
                 items.forEach(item => {
                     if (item.quantity > 0) {
                         Object.keys(item.storeData || {}).forEach(storeId => {
-                            if (item.storeData[storeId]) {
+                            // Skip 'all' - it's not a real store, just a filter option
+                            if (storeId !== 'all' && item.storeData[storeId]) {
                                 storesWithItems.add(storeId);
                             }
                         });
