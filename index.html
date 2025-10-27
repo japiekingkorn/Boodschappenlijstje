@@ -99,7 +99,7 @@
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold mb-2">Store Secties</label>
+                                <label className="block text-sm font-semibold mb-2">Store Sections</label>
                                 {stores.map(store => {
                                     const storeData = editingItem.storeData[store.id] || {};
                                     return (
@@ -209,7 +209,7 @@
                         <input
                             ref={inputRef}
                             type="text"
-                            placeholder="Zoek items..."
+                            placeholder="Search items..."
                             defaultValue=""
                             className="w-full px-4 py-2 pr-10 border rounded-lg"
                         />
@@ -485,9 +485,9 @@
                         saveCategories(newCategories);
                         saveItems(newItems);
 
-                        alert(`Geïmporteerd: ${newStores.length} winkels, ${newCategories.length} categorieën, ${newItems.length} items!`);
+                        alert(`Imported: ${newStores.length} stores, ${newCategories.length} categories, ${newItems.length} items!`);
                     } catch (error) {
-                        alert('Import mislukt. Controleer het CSV formaat.');
+                        alert('Import failed. Please check the CSV format.');
                     }
                 };
                 reader.readAsText(file);
@@ -540,7 +540,7 @@
                     <div className="flex flex-col h-full">
                         <div className="flex justify-between items-center px-4 pt-6 pb-4 border-b" style={{paddingTop: 'max(1.5rem, env(safe-area-inset-top))'}}>
                             <h1 className="text-xl font-bold">Stores</h1>
-                            <button onClick={() => setEditMode(!storesEditMode)} className="px-4 py-2 text-blue-600 min-h-[44px]">
+                            <button onClick={() => setStoresEditMode(!storesEditMode)} className="px-4 py-2 text-blue-600 min-h-[44px]">
                                 {storesEditMode ? 'Done' : 'Edit'}
                             </button>
                         </div>
@@ -607,7 +607,7 @@
                                         <button onClick={() => setShowStoreDetail(null)} className="text-gray-600"><XIcon /></button>
                                     </div>
                                     <div className="p-4">
-                                        <h3 className="font-semibold mb-2">Secties</h3>
+                                        <h3 className="font-semibold mb-2">Sections</h3>
                                         <div className="space-y-2">
                                             {showStoreDetail.sections.map((section, idx) => (
                                                 <div key={idx} className="flex items-center justify-between p-2 bg-gray-50 rounded">
@@ -621,7 +621,7 @@
                                                 </div>
                                             ))}
                                         </div>
-                                        <input type="text" placeholder="Voeg nieuwe sectie toe" className="w-full px-3 py-2 border rounded mt-4" onKeyPress={(e) => {
+                                        <input type="text" placeholder="Add new section" className="w-full px-3 py-2 border rounded mt-4" onKeyPress={(e) => {
                                             if (e.key === 'Enter' && e.target.value.trim()) {
                                                 const updated = { ...showStoreDetail };
                                                 updated.sections = [...updated.sections, e.target.value.trim()];
@@ -878,7 +878,7 @@
 
                             {toBuy.length === 0 && bought.length === 0 && (
                                 <div className="flex items-center justify-center h-full text-gray-400">
-                                    Geen items in lijst
+                                    No items in list
                                 </div>
                             )}
                         </div>
@@ -895,17 +895,17 @@
                         <div className="flex-1 p-4 space-y-4">
                             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                                 <h3 className="font-semibold mb-2">Import CSV</h3>
-                                <p className="text-sm text-gray-600 mb-3">Import je data vanuit ezShopList CSV export</p>
+                                <p className="text-sm text-gray-600 mb-3">Import your data from ezShopList CSV export</p>
                                 <label className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded cursor-pointer hover:bg-blue-700">
                                     <UploadIcon />
-                                    <span>Kies CSV Bestand</span>
+                                    <span>Choose CSV File</span>
                                     <input type="file" accept=".csv" onChange={handleCSVImport} className="hidden" />
                                 </label>
                             </div>
 
                             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                                 <h3 className="font-semibold mb-2">Export CSV</h3>
-                                <p className="text-sm text-gray-600 mb-3">Exporteer je huidige data als CSV backup</p>
+                                <p className="text-sm text-gray-600 mb-3">Export your current data as CSV backup</p>
                                 <button onClick={handleCSVExport} className="flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 w-full">
                                     <DownloadIcon />
                                     <span>Download CSV</span>
@@ -913,12 +913,12 @@
                             </div>
 
                             <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                                <h3 className="font-semibold mb-2">Data Opslag</h3>
+                                <h3 className="font-semibold mb-2">Data Storage</h3>
                                 <div className="text-sm text-gray-600 space-y-1">
-                                    <p>• Winkels: {stores.length}</p>
-                                    <p>• Categorieën: {categories.length}</p>
+                                    <p>• Stores: {stores.length}</p>
+                                    <p>• Categories: {categories.length}</p>
                                     <p>• Items: {items.length}</p>
-                                    <p className="mt-3 text-xs">Data wordt automatisch opgeslagen op je apparaat</p>
+                                    <p className="mt-3 text-xs">Data is automatically saved on your device</p>
                                 </div>
                             </div>
                         </div>
