@@ -442,17 +442,29 @@
             // Calculate number of stores to visit (stores that have items with quantity > 0)
             const getStoresToVisitCount = () => {
                 const storesWithItems = new Set();
+                const validStoreIds = new Set(stores.map(s => s.id));
+                
                 items.forEach(item => {
                     if (item.quantity > 0 && item.storeData) {
-                        // Only count stores that are explicitly selected for this item
+                        // Only count stores that EXIST in the stores list
                         Object.keys(item.storeData).forEach(storeId => {
-                            // Only add if storeData has actual content (not undefined/null)
-                            if (item.storeData[storeId]) {
+                            // Only add if:
+                            // 1. storeData has actual content (not undefined/null)
+                            // 2. The store still exists in the stores array
+                            if (item.storeData[storeId] && validStoreIds.has(storeId)) {
                                 storesWithItems.add(storeId);
                             }
                         });
                     }
                 });
+                
+                // Debug log (remove later)
+                console.log('🔍 Store count debug:', {
+                    totalStores: stores.length,
+                    storesWithItems: Array.from(storesWithItems),
+                    count: storesWithItems.size
+                });
+                
                 return storesWithItems.size;
             };
 
