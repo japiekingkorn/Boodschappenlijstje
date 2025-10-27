@@ -344,8 +344,20 @@
             };
 
             const deleteItem = (id) => {
+                // Save scroll position before delete
+                const scrollContainer = document.getElementById('items-scroll-container');
+                const scrollPosition = scrollContainer ? scrollContainer.scrollTop : 0;
+                
                 saveItems(items.filter(i => i.id !== id));
                 setShowItemDetail(null);
+                
+                // Restore scroll position after React re-renders
+                setTimeout(() => {
+                    const container = document.getElementById('items-scroll-container');
+                    if (container) {
+                        container.scrollTop = scrollPosition;
+                    }
+                }, 0);
             };
 
             const openItemDetail = (item) => {
@@ -658,7 +670,7 @@
                             editMode={itemsEditMode}
                         />
 
-                        <div className="flex-1 overflow-auto">
+                        <div id="items-scroll-container" className="flex-1 overflow-auto">
                             {itemsViewMode === 'categories' ? (
                                 categories.map(category => {
                                     const categoryItems = items.filter(item => item.categoryId === category.id);
