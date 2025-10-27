@@ -659,7 +659,19 @@
                 };
 
                 const handleEditToggle = () => {
+                    // Save scroll position before toggling edit mode
+                    const scrollContainer = document.getElementById('items-scroll-container');
+                    const scrollPosition = scrollContainer ? scrollContainer.scrollTop : 0;
+                    
                     setItemsEditMode(!itemsEditMode);
+                    
+                    // Restore scroll position after React re-renders
+                    setTimeout(() => {
+                        const container = document.getElementById('items-scroll-container');
+                        if (container) {
+                            container.scrollTop = scrollPosition;
+                        }
+                    }, 0);
                 };
 
                 return (
