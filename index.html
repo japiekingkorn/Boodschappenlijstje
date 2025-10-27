@@ -121,7 +121,7 @@
                                                 }} 
                                                 className="w-full px-3 py-1 border rounded text-sm"
                                             >
-                                                <option value="">Niet in deze winkel</option>
+                                                <option value="">No section selected</option>
                                                 {store.sections.map((section, idx) => <option key={idx} value={section}>{section}</option>)}
                                             </select>
                                         </div>
@@ -137,9 +137,8 @@
         const XIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>;
 
         // Completely bypass React for search - use pure DOM manipulation
-        function ItemsSearchBar({ onModeChange, onEditToggle }) {
+        function ItemsSearchBar({ onModeChange, onEditToggle, editMode }) {
             const [viewMode, setViewMode] = React.useState('categories');
-            const [isEditMode, setIsEditMode] = React.useState(false);
             const inputRef = React.useRef(null);
             
             React.useEffect(() => {
@@ -194,7 +193,6 @@
             };
             
             const handleEditToggle = () => {
-                setIsEditMode(!isEditMode);
                 onEditToggle();
             };
             
@@ -202,8 +200,8 @@
                 <div className="p-4 border-b space-y-3">
                     <div className="flex justify-between items-center">
                         <h1 className="text-xl font-bold">Items</h1>
-                        <button onClick={handleEditToggle} className="px-4 py-2 text-blue-600">
-                            {isEditMode ? 'Done' : 'Edit'}
+                        <button onClick={handleEditToggle} className="px-4 py-2 text-blue-600 min-h-[44px]">
+                            {editMode ? 'Done' : 'Edit'}
                         </button>
                     </div>
                     
@@ -249,7 +247,8 @@
             const [items, setItems] = useState([]);
             const [selectedStore, setSelectedStore] = useState('all');
             const [expandedCategories, setExpandedCategories] = useState({});
-            const [editMode, setEditMode] = useState(false);
+            const [storesEditMode, setStoresEditMode] = useState(false);
+            const [itemsEditMode, setItemsEditMode] = useState(false);
             const [showAddStore, setShowAddStore] = useState(false);
             const [showAddCategory, setShowAddCategory] = useState(false);
             const [showAddItem, setShowAddItem] = useState(false);
@@ -539,10 +538,10 @@
             function StoresTab() {
                 return (
                     <div className="flex flex-col h-full">
-                        <div className="flex justify-between items-center p-4 border-b">
+                        <div className="flex justify-between items-center px-4 pt-6 pb-4 border-b" style={{paddingTop: 'max(1.5rem, env(safe-area-inset-top))'}}>
                             <h1 className="text-xl font-bold">Stores</h1>
-                            <button onClick={() => setEditMode(!editMode)} className="px-4 py-2 text-blue-600">
-                                {editMode ? 'Done' : 'Edit'}
+                            <button onClick={() => setEditMode(!storesEditMode)} className="px-4 py-2 text-blue-600 min-h-[44px]">
+                                {storesEditMode ? 'Done' : 'Edit'}
                             </button>
                         </div>
                         
@@ -553,7 +552,7 @@
                                 <div className="w-20 text-center font-semibold">Selected</div>
                             </div>
 
-                            <div onClick={() => !editMode && setSelectedStore('all')} className="flex items-center px-4 py-3 border-b bg-white cursor-pointer hover:bg-gray-50">
+                            <div onClick={() => !storesEditMode && setSelectedStore('all')} className="flex items-center px-4 py-3 border-b bg-white cursor-pointer hover:bg-gray-50">
                                 <div className="flex-1 font-semibold">All Stores</div>
                                 <div className="w-20 text-center">{getStoreItemCount('all')}</div>
                                 <div className="w-20 text-center">
@@ -563,8 +562,8 @@
 
                             {stores.map(store => (
                                 <div key={store.id} className="border-b bg-white">
-                                    <div onClick={() => !editMode && setSelectedStore(store.id)} className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50">
-                                        {editMode && (
+                                    <div onClick={() => !storesEditMode && setSelectedStore(store.id)} className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50">
+                                        {storesEditMode && (
                                             <button onClick={(e) => { e.stopPropagation(); deleteStore(store.id); }} className="mr-2 text-red-600">
                                                 <MinusIcon />
                                             </button>
@@ -574,7 +573,7 @@
                                         <div className="w-20 text-center">
                                             {selectedStore === store.id && <div className="inline-block"><CheckIcon /></div>}
                                         </div>
-                                        {!editMode && (
+                                        {!storesEditMode && (
                                             <button onClick={(e) => { e.stopPropagation(); setShowStoreDetail(store); }} className="ml-2">
                                                 <ChevronRightIcon />
                                             </button>
@@ -584,7 +583,7 @@
                             ))}
                         </div>
 
-                        {editMode && (
+                        {storesEditMode && (
                             <div className="p-4 border-t bg-white">
                                 {showAddStore ? (
                                     <div className="flex gap-2">
@@ -648,7 +647,7 @@
                 };
 
                 const handleEditToggle = () => {
-                    setEditMode(!editMode);
+                    setItemsEditMode(!itemsEditMode);
                 };
 
                 return (
@@ -656,6 +655,7 @@
                         <ItemsSearchBar 
                             onModeChange={handleModeChange}
                             onEditToggle={handleEditToggle}
+                            editMode={itemsEditMode}
                         />
 
                         <div className="flex-1 overflow-auto">
@@ -666,7 +666,7 @@
                                     return (
                                         <div key={category.id} className="border-b" data-category-section>
                                             <div onClick={() => toggleCategory(category.id)} className="flex items-center px-4 py-3 bg-gray-50 cursor-pointer hover:bg-gray-100">
-                                                {editMode && (
+                                                {itemsEditMode && (
                                                     <button onClick={(e) => { e.stopPropagation(); deleteCategory(category.id); }} className="mr-2 text-red-600">
                                                         <MinusIcon />
                                                     </button>
@@ -679,12 +679,12 @@
                                                 <div>
                                                     {categoryItems.map(item => (
                                                         <div key={item.id} data-item-id={item.id} data-item-name={item.name} className="flex items-center px-4 py-3 pl-12 border-b bg-white hover:bg-gray-50">
-                                                            {editMode && (
+                                                            {itemsEditMode && (
                                                                 <button onClick={(e) => { e.stopPropagation(); deleteItem(item.id); }} className="mr-2 text-red-600">
                                                                     <MinusIcon />
                                                                 </button>
                                                             )}
-                                                            <div className="flex-1 cursor-pointer" onClick={() => !editMode && openItemDetail(item)}>{item.name}</div>
+                                                            <div className="flex-1 cursor-pointer" onClick={() => !itemsEditMode && openItemDetail(item)}>{item.name}</div>
                                                             <div className="flex items-center gap-2">
                                                                 <button onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, -1); }} className="w-8 h-8 flex items-center justify-center border rounded active:bg-gray-200">
                                                                     <MinusIcon />
@@ -694,7 +694,7 @@
                                                                     <PlusIcon />
                                                                 </button>
                                                             </div>
-                                                            {!editMode && (
+                                                            {!itemsEditMode && (
                                                                 <button onClick={() => openItemDetail(item)} className="ml-2 cursor-pointer">
                                                                     <ChevronRightIcon />
                                                                 </button>
@@ -712,12 +712,12 @@
                                         const category = categories.find(c => c.id === item.categoryId);
                                         return (
                                             <div key={item.id} data-item-id={item.id} data-item-name={item.name} className="flex items-center px-4 py-3 border-b bg-white hover:bg-gray-50">
-                                                {editMode && (
+                                                {itemsEditMode && (
                                                     <button onClick={(e) => { e.stopPropagation(); deleteItem(item.id); }} className="mr-2 text-red-600">
                                                         <MinusIcon />
                                                     </button>
                                                 )}
-                                                <div className="flex-1 cursor-pointer" onClick={() => !editMode && openItemDetail(item)}>
+                                                <div className="flex-1 cursor-pointer" onClick={() => !itemsEditMode && openItemDetail(item)}>
                                                     <div className="font-medium">{item.name}</div>
                                                     <div className="text-sm text-gray-600">{category?.name}</div>
                                                 </div>
@@ -730,7 +730,7 @@
                                                         <PlusIcon />
                                                     </button>
                                                 </div>
-                                                {!editMode && (
+                                                {!itemsEditMode && (
                                                     <button onClick={() => openItemDetail(item)} className="ml-2 cursor-pointer">
                                                         <ChevronRightIcon />
                                                     </button>
@@ -742,7 +742,7 @@
                             )}
                         </div>
 
-                        {editMode && (
+                        {itemsEditMode && (
                             <div className="p-4 border-t bg-white space-y-2">
                                 {showAddCategory ? (
                                     <div className="flex gap-2">
