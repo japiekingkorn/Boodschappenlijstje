@@ -375,11 +375,11 @@
                     const newQty = Math.max(0, currentQty + change);
                     qtyElement.textContent = newQty;
                     
-                    const storedItems = JSON.parse(localStorage.getItem('ezshop_items') || '[]');
-                    const updatedItems = storedItems.map(item => 
+                    // Update React state immediately so List tab shows changes
+                    const updatedItems = items.map(item => 
                         item.id === itemId ? { ...item, quantity: newQty } : item
                     );
-                    localStorage.setItem('ezshop_items', JSON.stringify(updatedItems));
+                    saveItems(updatedItems);
                 }
             };
 
