@@ -218,7 +218,7 @@
             };
             
             return (
-                <div className="p-4 border-b space-y-3">
+                <div className="p-4 border-b space-y-3" style={{paddingTop: 'max(1rem, env(safe-area-inset-top))'}}>
                     <div className="flex justify-between items-center">
                         <h1 className="text-xl font-bold">Items</h1>
                         <button onClick={handleEditToggle} className="px-4 py-2 text-blue-600 min-h-[44px]">
@@ -239,7 +239,7 @@
                             type="button"
                             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                         >
-                            ?oeo
+                            ×
                         </button>
                     </div>
 
@@ -329,7 +329,7 @@
                             // Save cleaned data back to localStorage
                             localStorage.setItem('ezshop_items', JSON.stringify(cleanedItems));
                             
-                            console.log('? Cleaned up old store references from items');
+                            console.log('✅ Cleaned up old store references from items');
                         } else {
                             setItems(loadedItems);
                         }
@@ -618,7 +618,7 @@
                         escapeCSV(category?.name || '')
                     ];
                     stores.forEach(store => {
-                        row.push(escapeCSV('EUR 0,00'));  // Properly escaped now
+                        row.push(escapeCSV('€ 0,00'));  // Properly escaped now
                         row.push(escapeCSV(item.storeData[store.id]?.section || ''));
                     });
                     rows.push(row.join(','));
@@ -1047,9 +1047,9 @@
                             <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                                 <h3 className="font-semibold mb-2">Data Storage</h3>
                                 <div className="text-sm text-gray-600 space-y-1">
-                                    <p>?EUR? Stores: {stores.length}</p>
-                                    <p>?EUR? Categories: {categories.length}</p>
-                                    <p>?EUR? Items: {items.length}</p>
+                                    <p>• Stores: {stores.length}</p>
+                                    <p>• Categories: {categories.length}</p>
+                                    <p>• Items: {items.length}</p>
                                     <p className="mt-3 text-xs">Data is automatically saved on your device</p>
                                 </div>
                             </div>
@@ -1069,7 +1069,7 @@
                         <div className="p-4 space-y-6">
                             {/* Overview */}
                             <section>
-                                <h2 className="text-lg font-bold mb-2 text-blue-600">??"? Overview</h2>
+                                <h2 className="text-lg font-bold mb-2 text-blue-600">Overview</h2>
                                 <p className="text-sm text-gray-700">
                                     ezShopList helps you organize your shopping across multiple stores. Create items, 
                                     assign them to categories, set which store section they're in, and build your shopping list.
@@ -1078,7 +1078,7 @@
 
                             {/* Stores Tab */}
                             <section>
-                                <h2 className="text-lg font-bold mb-2 text-blue-600">???? Stores Tab</h2>
+                                <h2 className="text-lg font-bold mb-2 text-blue-600">Stores Tab</h2>
                                 <div className="space-y-2 text-sm">
                                     <p><strong>Add Stores:</strong> Tap "Edit" then add your favorite stores (e.g., Walmart, Costco).</p>
                                     <p><strong>Store Sections:</strong> Click on a store to add sections like "Produce", "Dairy", "Frozen". 
@@ -1091,13 +1091,13 @@
 
                             {/* Items Tab */}
                             <section>
-                                <h2 className="text-lg font-bold mb-2 text-blue-600">??"? Items Tab</h2>
+                                <h2 className="text-lg font-bold mb-2 text-blue-600">Items Tab</h2>
                                 <div className="space-y-2 text-sm">
                                     <p><strong>Search:</strong> Use the search bar to quickly find items. The keyboard stays open while you type!</p>
                                     <p><strong>View Modes:</strong></p>
                                     <ul className="ml-4 space-y-1">
-                                        <li>?EUR? <strong>Categories:</strong> Items grouped by category (expand/collapse)</li>
-                                        <li>?EUR? <strong>Items Only:</strong> All items alphabetically in one list</li>
+                                        <li>• <strong>Categories:</strong> Items grouped by category (expand/collapse)</li>
+                                        <li>• <strong>Items Only:</strong> All items alphabetically in one list</li>
                                     </ul>
                                     <p><strong>Add Items:</strong> In Edit mode, add items and assign them to categories.</p>
                                     <p><strong>Quantity Buttons:</strong> Use + and - to adjust how many you need.</p>
@@ -1108,7 +1108,7 @@
 
                             {/* List Tab */}
                             <section>
-                                <h2 className="text-lg font-bold mb-2 text-blue-600">??>' Shopping List Tab</h2>
+                                <h2 className="text-lg font-bold mb-2 text-blue-600">Shopping List Tab</h2>
                                 <div className="space-y-2 text-sm">
                                     <p><strong>Your Active List:</strong> Shows all items with quantity &gt; 0.</p>
                                     <p><strong>Store Filter:</strong> The list shows items for your selected store from the Stores tab.</p>
@@ -1120,7 +1120,7 @@
 
                             {/* File Tab */}
                             <section>
-                                <h2 className="text-lg font-bold mb-2 text-blue-600">??' 3/4  File Tab</h2>
+                                <h2 className="text-lg font-bold mb-2 text-blue-600">File Tab</h2>
                                 <div className="space-y-2 text-sm">
                                     <p><strong>Import CSV:</strong> Upload a previously exported CSV file to restore your data.</p>
                                     <p><strong>Export CSV:</strong> Download all your data as a backup. You can open this in Excel or 
@@ -1131,20 +1131,20 @@
 
                             {/* Tips */}
                             <section>
-                                <h2 className="text-lg font-bold mb-2 text-blue-600">??'? Tips & Tricks</h2>
+                                <h2 className="text-lg font-bold mb-2 text-blue-600">Tips & Tricks</h2>
                                 <div className="space-y-2 text-sm">
-                                    <p>?oe" Set up your stores and their sections first for the best experience.</p>
-                                    <p>?oe" Use categories like "Produce", "Snacks", "Beverages" to organize items.</p>
-                                    <p>?oe" Assign items to store sections so they appear in shopping order.</p>
-                                    <p>?oe" Export your data regularly as a backup!</p>
-                                    <p>?oe" Use the search to quickly find items when your list gets long.</p>
-                                    <p>?oe" The app works offline - no internet connection needed.</p>
+                                    <p>- Set up your stores and their sections first for the best experience.</p>
+                                    <p>- Use categories like "Produce", "Snacks", "Beverages" to organize items.</p>
+                                    <p>- Assign items to store sections so they appear in shopping order.</p>
+                                    <p>- Export your data regularly as a backup!</p>
+                                    <p>- Use the search to quickly find items when your list gets long.</p>
+                                    <p>- The app works offline - no internet connection needed.</p>
                                 </div>
                             </section>
 
                             {/* Workflow */}
                             <section className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                                <h2 className="text-lg font-bold mb-2 text-blue-700">??",, Quick Workflow</h2>
+                                <h2 className="text-lg font-bold mb-2 text-blue-700">Quick Workflow</h2>
                                 <div className="space-y-1 text-sm">
                                     <p><strong>1.</strong> Add your favorite stores and their sections</p>
                                     <p><strong>2.</strong> Create categories for your items</p>
@@ -1159,7 +1159,7 @@
                             {/* Version Info */}
                             <div className="text-center text-xs text-gray-500 mt-8 pb-4">
                                 <p>ezShopList v1.0</p>
-                                <p className="mt-1">Made with ????,? for organized shopping</p>
+                                <p className="mt-1">Made with care for organized shopping</p>
                             </div>
                         </div>
                     </div>
