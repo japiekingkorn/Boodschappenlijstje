@@ -401,6 +401,26 @@
                 return items.filter(item => item.storeData[storeId] && item.quantity > 0).length;
             };
 
+            // Calculate total quantity (sum of all item quantities)
+            const getTotalItemQuantity = () => {
+                return items.reduce((sum, item) => sum + (item.quantity || 0), 0);
+            };
+
+            // Calculate number of stores to visit (stores that have items with quantity > 0)
+            const getStoresToVisitCount = () => {
+                const storesWithItems = new Set();
+                items.forEach(item => {
+                    if (item.quantity > 0) {
+                        Object.keys(item.storeData || {}).forEach(storeId => {
+                            if (item.storeData[storeId]) {
+                                storesWithItems.add(storeId);
+                            }
+                        });
+                    }
+                });
+                return storesWithItems.size;
+            };
+
             const getListItems = () => {
                 return items.filter(item => {
                     if (item.quantity === 0) return false;
@@ -1070,7 +1090,14 @@
 
                     <div className="flex border-t bg-white bottom-nav">
                         <button onClick={() => setActiveTab('stores')} className={`flex-1 flex flex-col items-center py-3 ${activeTab === 'stores' ? 'text-blue-600' : 'text-gray-400'}`}>
-                            <HomeIcon />
+                            <div className="relative">
+                                <HomeIcon />
+                                {getStoresToVisitCount() > 0 && (
+                                    <span className="absolute -top-1 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                                        {getStoresToVisitCount()}
+                                    </span>
+                                )}
+                            </div>
                             <span className="text-xs mt-1">Stores</span>
                         </button>
                         <button onClick={() => setActiveTab('items')} className={`flex-1 flex flex-col items-center py-3 ${activeTab === 'items' ? 'text-blue-600' : 'text-gray-400'}`}>
@@ -1078,7 +1105,14 @@
                             <span className="text-xs mt-1">Items</span>
                         </button>
                         <button onClick={() => setActiveTab('list')} className={`flex-1 flex flex-col items-center py-3 ${activeTab === 'list' ? 'text-blue-600' : 'text-gray-400'}`}>
-                            <CartIcon />
+                            <div className="relative">
+                                <CartIcon />
+                                {getTotalItemQuantity() > 0 && (
+                                    <span className="absolute -top-1 -right-2 bg-blue-500 text-white text-xs rounded-full min-w-[20px] h-5 px-1 flex items-center justify-center font-bold">
+                                        {getTotalItemQuantity()}
+                                    </span>
+                                )}
+                            </div>
                             <span className="text-xs mt-1">List</span>
                         </button>
                         <button onClick={() => setActiveTab('file')} className={`flex-1 flex flex-col items-center py-3 ${activeTab === 'file' ? 'text-blue-600' : 'text-gray-400'}`}>
