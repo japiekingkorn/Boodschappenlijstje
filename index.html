@@ -534,6 +534,7 @@
             const TrashIcon = () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>;
             const UploadIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>;
             const DownloadIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>;
+            const InfoIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
 
             function StoresTab() {
                 return (
@@ -925,6 +926,114 @@
                 );
             }
 
+            function HelpTab() {
+                return (
+                    <div className="flex flex-col h-full overflow-auto">
+                        <div className="p-4 border-b bg-blue-600 text-white">
+                            <h1 className="text-xl font-bold">ezShopList User Manual</h1>
+                            <p className="text-sm mt-1 opacity-90">How to use this shopping list app</p>
+                        </div>
+                        
+                        <div className="p-4 space-y-6">
+                            {/* Overview */}
+                            <section>
+                                <h2 className="text-lg font-bold mb-2 text-blue-600">📱 Overview</h2>
+                                <p className="text-sm text-gray-700">
+                                    ezShopList helps you organize your shopping across multiple stores. Create items, 
+                                    assign them to categories, set which store section they're in, and build your shopping list.
+                                </p>
+                            </section>
+
+                            {/* Stores Tab */}
+                            <section>
+                                <h2 className="text-lg font-bold mb-2 text-blue-600">🏪 Stores Tab</h2>
+                                <div className="space-y-2 text-sm">
+                                    <p><strong>Add Stores:</strong> Tap "Edit" then add your favorite stores (e.g., Walmart, Costco).</p>
+                                    <p><strong>Store Sections:</strong> Click on a store to add sections like "Produce", "Dairy", "Frozen". 
+                                    This helps you organize items by aisle.</p>
+                                    <p><strong>Select Store:</strong> Tap a store name to see only items available there. Select "All Stores" 
+                                    to see everything.</p>
+                                    <p><strong>Delete:</strong> In Edit mode, tap the minus button to remove a store.</p>
+                                </div>
+                            </section>
+
+                            {/* Items Tab */}
+                            <section>
+                                <h2 className="text-lg font-bold mb-2 text-blue-600">📝 Items Tab</h2>
+                                <div className="space-y-2 text-sm">
+                                    <p><strong>Search:</strong> Use the search bar to quickly find items. The keyboard stays open while you type!</p>
+                                    <p><strong>View Modes:</strong></p>
+                                    <ul className="ml-4 space-y-1">
+                                        <li>• <strong>Categories:</strong> Items grouped by category (expand/collapse)</li>
+                                        <li>• <strong>Items Only:</strong> All items alphabetically in one list</li>
+                                    </ul>
+                                    <p><strong>Add Items:</strong> In Edit mode, add items and assign them to categories.</p>
+                                    <p><strong>Quantity Buttons:</strong> Use + and - to adjust how many you need.</p>
+                                    <p><strong>Edit Item Details:</strong> Tap an item to set its name, category, and store sections.</p>
+                                    <p><strong>Save Changes:</strong> Always tap "Save" after editing item details!</p>
+                                </div>
+                            </section>
+
+                            {/* List Tab */}
+                            <section>
+                                <h2 className="text-lg font-bold mb-2 text-blue-600">🛒 Shopping List Tab</h2>
+                                <div className="space-y-2 text-sm">
+                                    <p><strong>Your Active List:</strong> Shows all items with quantity &gt; 0.</p>
+                                    <p><strong>Store Filter:</strong> The list shows items for your selected store from the Stores tab.</p>
+                                    <p><strong>Sections:</strong> Items are organized by store section for efficient shopping.</p>
+                                    <p><strong>Check Off Items:</strong> Tap an item to mark it as bought. It moves to "Bought Items".</p>
+                                    <p><strong>Clear List:</strong> Tap "Clear" to reset all bought items and their quantities to zero.</p>
+                                </div>
+                            </section>
+
+                            {/* File Tab */}
+                            <section>
+                                <h2 className="text-lg font-bold mb-2 text-blue-600">💾 File Tab</h2>
+                                <div className="space-y-2 text-sm">
+                                    <p><strong>Import CSV:</strong> Upload a previously exported CSV file to restore your data.</p>
+                                    <p><strong>Export CSV:</strong> Download all your data as a backup. You can open this in Excel or 
+                                    import it later.</p>
+                                    <p><strong>Data Storage:</strong> All data is saved automatically on your device. No internet needed!</p>
+                                </div>
+                            </section>
+
+                            {/* Tips */}
+                            <section>
+                                <h2 className="text-lg font-bold mb-2 text-blue-600">💡 Tips & Tricks</h2>
+                                <div className="space-y-2 text-sm">
+                                    <p>✓ Set up your stores and their sections first for the best experience.</p>
+                                    <p>✓ Use categories like "Produce", "Snacks", "Beverages" to organize items.</p>
+                                    <p>✓ Assign items to store sections so they appear in shopping order.</p>
+                                    <p>✓ Export your data regularly as a backup!</p>
+                                    <p>✓ Use the search to quickly find items when your list gets long.</p>
+                                    <p>✓ The app works offline - no internet connection needed.</p>
+                                </div>
+                            </section>
+
+                            {/* Workflow */}
+                            <section className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                <h2 className="text-lg font-bold mb-2 text-blue-700">🔄 Quick Workflow</h2>
+                                <div className="space-y-1 text-sm">
+                                    <p><strong>1.</strong> Add your favorite stores and their sections</p>
+                                    <p><strong>2.</strong> Create categories for your items</p>
+                                    <p><strong>3.</strong> Add items and assign categories + store sections</p>
+                                    <p><strong>4.</strong> Adjust quantities using +/- buttons</p>
+                                    <p><strong>5.</strong> Select your store and go to the List tab</p>
+                                    <p><strong>6.</strong> Shop and check off items as you go!</p>
+                                    <p><strong>7.</strong> Clear the list when done</p>
+                                </div>
+                            </section>
+
+                            {/* Version Info */}
+                            <div className="text-center text-xs text-gray-500 mt-8 pb-4">
+                                <p>ezShopList v1.0</p>
+                                <p className="mt-1">Made with ❤️ for organized shopping</p>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
             return (
                 <div className="flex flex-col h-screen bg-white">
                     <div className="flex-1 overflow-hidden">
@@ -932,6 +1041,7 @@
                         {activeTab === 'items' && <ItemsTab />}
                         {activeTab === 'list' && <ListTab />}
                         {activeTab === 'file' && <FileTab />}
+                        {activeTab === 'help' && <HelpTab />}
                     </div>
 
                     <div className="flex border-t bg-white bottom-nav">
@@ -950,6 +1060,10 @@
                         <button onClick={() => setActiveTab('file')} className={`flex-1 flex flex-col items-center py-3 ${activeTab === 'file' ? 'text-blue-600' : 'text-gray-400'}`}>
                             <FolderIcon />
                             <span className="text-xs mt-1">File</span>
+                        </button>
+                        <button onClick={() => setActiveTab('help')} className={`flex-1 flex flex-col items-center py-3 ${activeTab === 'help' ? 'text-blue-600' : 'text-gray-400'}`}>
+                            <InfoIcon />
+                            <span className="text-xs mt-1">Help</span>
                         </button>
                     </div>
                 </div>
