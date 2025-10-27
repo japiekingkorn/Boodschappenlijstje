@@ -369,6 +369,10 @@
             };
 
             const updateQuantity = (itemId, change) => {
+                // Save scroll position before updating
+                const scrollContainer = document.getElementById('items-scroll-container');
+                const scrollPosition = scrollContainer ? scrollContainer.scrollTop : 0;
+                
                 const qtyElement = document.querySelector(`[data-item-id="${itemId}"] .item-qty`);
                 if (qtyElement) {
                     const currentQty = parseInt(qtyElement.textContent) || 0;
@@ -380,6 +384,14 @@
                         item.id === itemId ? { ...item, quantity: newQty } : item
                     );
                     saveItems(updatedItems);
+                    
+                    // Restore scroll position after React re-renders
+                    setTimeout(() => {
+                        const container = document.getElementById('items-scroll-container');
+                        if (container) {
+                            container.scrollTop = scrollPosition;
+                        }
+                    }, 0);
                 }
             };
 
@@ -415,7 +427,11 @@
                         Object.keys(item.storeData || {}).forEach(storeId => {
                             // Skip 'all' - it's not a real store, just a filter option
                             if (storeId !== 'all' && item.storeData[storeId]) {
-                                storesWithItems.add(storeId);
+                                // Check if storeData[storeId] has actual content (not just empty object)
+                                const storeInfo = item.storeData[storeId];
+                                if (storeInfo && (storeInfo.section || typeof storeInfo === 'boolean')) {
+                                    storesWithItems.add(storeId);
+                                }
                             }
                         });
                     }
