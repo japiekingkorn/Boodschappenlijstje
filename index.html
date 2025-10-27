@@ -218,7 +218,7 @@
             };
             
             return (
-                <div className="p-4 border-b space-y-3" style={{paddingTop: 'max(1.5rem, env(safe-area-inset-top))'}}>
+                <div className="px-4 pb-4 pt-6 border-b space-y-3" style={{paddingTop: 'max(1.5rem, env(safe-area-inset-top))'}}>
                     <div className="flex justify-between items-center">
                         <h1 className="text-xl font-bold">Items</h1>
                         <button onClick={handleEditToggle} className="px-4 py-2 text-blue-600 min-h-[44px]">
@@ -297,6 +297,25 @@
 
             useEffect(() => {
                 try {
+                    // MIGRATION: Check if old ezshop data exists and migrate it
+                    const oldStoresData = localStorage.getItem('ezshop_stores');
+                    const oldCategoriesData = localStorage.getItem('ezshop_categories');
+                    const oldItemsData = localStorage.getItem('ezshop_items');
+                    
+                    if (oldStoresData && !localStorage.getItem('cartpal_stores')) {
+                        localStorage.setItem('cartpal_stores', oldStoresData);
+                        console.log('✅ Migrated stores data from ezShopList to CartPal');
+                    }
+                    if (oldCategoriesData && !localStorage.getItem('cartpal_categories')) {
+                        localStorage.setItem('cartpal_categories', oldCategoriesData);
+                        console.log('✅ Migrated categories data from ezShopList to CartPal');
+                    }
+                    if (oldItemsData && !localStorage.getItem('cartpal_items')) {
+                        localStorage.setItem('cartpal_items', oldItemsData);
+                        console.log('✅ Migrated items data from ezShopList to CartPal');
+                    }
+                    
+                    // Load data (either migrated or existing)
                     const storesData = localStorage.getItem('cartpal_stores');
                     const categoriesData = localStorage.getItem('cartpal_categories');
                     const itemsData = localStorage.getItem('cartpal_items');
@@ -1021,7 +1040,7 @@
             function FileTab() {
                 return (
                     <div className="flex flex-col h-full">
-                        <div className="p-4 border-b" style={{paddingTop: 'max(1.5rem, env(safe-area-inset-top))'}}>
+                        <div className="px-4 pb-4 pt-6 border-b" style={{paddingTop: 'max(1.5rem, env(safe-area-inset-top))'}}>
                             <h1 className="text-xl font-bold">File Management</h1>
                         </div>
                         <div className="flex-1 p-4 space-y-4">
@@ -1061,7 +1080,7 @@
             function HelpTab() {
                 return (
                     <div className="flex flex-col h-full overflow-auto">
-                        <div className="p-4 border-b bg-blue-600 text-white" style={{paddingTop: 'max(1.5rem, env(safe-area-inset-top))'}}>
+                        <div className="px-4 pb-4 pt-6 border-b bg-blue-600 text-white" style={{paddingTop: 'max(1.5rem, env(safe-area-inset-top))'}}>
                             <h1 className="text-xl font-bold">CartPal User Manual</h1>
                             <p className="text-sm mt-1 opacity-90">How to use this shopping list app</p>
                         </div>
