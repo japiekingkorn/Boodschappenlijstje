@@ -444,9 +444,12 @@
                 const storesWithItems = new Set();
                 items.forEach(item => {
                     if (item.quantity > 0 && item.storeData) {
-                        // Add each store ID where this item is available
+                        // Only count stores that are explicitly selected for this item
                         Object.keys(item.storeData).forEach(storeId => {
-                            storesWithItems.add(storeId);
+                            // Only add if storeData has actual content (not undefined/null)
+                            if (item.storeData[storeId]) {
+                                storesWithItems.add(storeId);
+                            }
                         });
                     }
                 });
