@@ -579,19 +579,34 @@
                     headers.push(`${store.name} cost`, `${store.name} section`);
                 });
 
-                const rows = [headers.join(',')];
+                // Helper function to escape CSV fields
+                const escapeCSV = (field) => {
+                    if (field === null || field === undefined) return '';
+                    const str = String(field);
+                    // If field contains comma, quote, or newline, wrap in quotes and escape quotes
+                    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+                        return `"${str.replace(/"/g, '""')}"`;
+                    }
+                    return str;
+                };
+
+                const rows = [headers.map(escapeCSV).join(',')];
                 items.forEach(item => {
                     const category = categories.find(c => c.id === item.categoryId);
-                    const row = [item.name, item.quantity || 0, category?.name || ''];
+                    const row = [
+                        escapeCSV(item.name),
+                        escapeCSV(item.quantity || 0),
+                        escapeCSV(category?.name || '')
+                    ];
                     stores.forEach(store => {
-                        row.push('â‚¬ 0,00');
-                        row.push(item.storeData[store.id]?.section || '');
+                        row.push(escapeCSV('€ 0,00'));  // Properly escaped now
+                        row.push(escapeCSV(item.storeData[store.id]?.section || ''));
                     });
                     rows.push(row.join(','));
                 });
 
                 const csv = rows.join('\n');
-                const blob = new Blob([csv], { type: 'text/csv' });
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
