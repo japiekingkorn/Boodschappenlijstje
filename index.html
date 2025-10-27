@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="ezShopList">
-    <title>ezShopList</title>
+    <meta name="apple-mobile-web-app-title" content="CartPal">
+    <title>CartPal</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -218,7 +218,7 @@
             };
             
             return (
-                <div className="p-4 border-b space-y-3" style={{paddingTop: 'max(1rem, env(safe-area-inset-top))'}}>
+                <div className="p-4 border-b space-y-3" style={{paddingTop: 'max(1.5rem, env(safe-area-inset-top))'}}>
                     <div className="flex justify-between items-center">
                         <h1 className="text-xl font-bold">Items</h1>
                         <button onClick={handleEditToggle} className="px-4 py-2 text-blue-600 min-h-[44px]">
@@ -297,9 +297,9 @@
 
             useEffect(() => {
                 try {
-                    const storesData = localStorage.getItem('ezshop_stores');
-                    const categoriesData = localStorage.getItem('ezshop_categories');
-                    const itemsData = localStorage.getItem('ezshop_items');
+                    const storesData = localStorage.getItem('cartpal_stores');
+                    const categoriesData = localStorage.getItem('cartpal_categories');
+                    const itemsData = localStorage.getItem('cartpal_items');
                     
                     if (storesData) setStores(JSON.parse(storesData));
                     if (categoriesData) setCategories(JSON.parse(categoriesData));
@@ -327,7 +327,7 @@
                             
                             setItems(cleanedItems);
                             // Save cleaned data back to localStorage
-                            localStorage.setItem('ezshop_items', JSON.stringify(cleanedItems));
+                            localStorage.setItem('cartpal_items', JSON.stringify(cleanedItems));
                             
                             console.log('✅ Cleaned up old store references from items');
                         } else {
@@ -341,17 +341,17 @@
 
             const saveStores = (data) => {
                 setStores(data);
-                localStorage.setItem('ezshop_stores', JSON.stringify(data));
+                localStorage.setItem('cartpal_stores', JSON.stringify(data));
             };
 
             const saveCategories = (data) => {
                 setCategories(data);
-                localStorage.setItem('ezshop_categories', JSON.stringify(data));
+                localStorage.setItem('cartpal_categories', JSON.stringify(data));
             };
 
             const saveItems = (data) => {
                 setItems(data);
-                localStorage.setItem('ezshop_items', JSON.stringify(data));
+                localStorage.setItem('cartpal_items', JSON.stringify(data));
             };
 
             const addStore = () => {
@@ -629,7 +629,7 @@
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'ezshoplist_export.csv';
+                a.download = 'cartpal_export.csv';
                 a.click();
                 URL.revokeObjectURL(url);
             };
@@ -1021,13 +1021,13 @@
             function FileTab() {
                 return (
                     <div className="flex flex-col h-full">
-                        <div className="p-4 border-b">
+                        <div className="p-4 border-b" style={{paddingTop: 'max(1.5rem, env(safe-area-inset-top))'}}>
                             <h1 className="text-xl font-bold">File Management</h1>
                         </div>
                         <div className="flex-1 p-4 space-y-4">
                             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                                 <h3 className="font-semibold mb-2">Import CSV</h3>
-                                <p className="text-sm text-gray-600 mb-3">Import your data from ezShopList CSV export</p>
+                                <p className="text-sm text-gray-600 mb-3">Import your data from CartPal CSV export</p>
                                 <label className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded cursor-pointer hover:bg-blue-700">
                                     <UploadIcon />
                                     <span>Choose CSV File</span>
@@ -1061,8 +1061,8 @@
             function HelpTab() {
                 return (
                     <div className="flex flex-col h-full overflow-auto">
-                        <div className="p-4 border-b bg-blue-600 text-white">
-                            <h1 className="text-xl font-bold">ezShopList User Manual</h1>
+                        <div className="p-4 border-b bg-blue-600 text-white" style={{paddingTop: 'max(1.5rem, env(safe-area-inset-top))'}}>
+                            <h1 className="text-xl font-bold">CartPal User Manual</h1>
                             <p className="text-sm mt-1 opacity-90">How to use this shopping list app</p>
                         </div>
                         
@@ -1071,7 +1071,7 @@
                             <section>
                                 <h2 className="text-lg font-bold mb-2 text-blue-600">Overview</h2>
                                 <p className="text-sm text-gray-700">
-                                    ezShopList helps you organize your shopping across multiple stores. Create items, 
+                                    CartPal helps you organize your shopping across multiple stores. Create items, 
                                     assign them to categories, set which store section they're in, and build your shopping list.
                                 </p>
                             </section>
@@ -1158,7 +1158,7 @@
 
                             {/* Version Info */}
                             <div className="text-center text-xs text-gray-500 mt-8 pb-4">
-                                <p>ezShopList v1.0</p>
+                                <p>CartPal v1.0</p>
                                 <p className="mt-1">Made with care for organized shopping</p>
                             </div>
                         </div>
