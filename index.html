@@ -303,7 +303,37 @@
                     
                     if (storesData) setStores(JSON.parse(storesData));
                     if (categoriesData) setCategories(JSON.parse(categoriesData));
-                    if (itemsData) setItems(JSON.parse(itemsData));
+                    if (itemsData) {
+                        const loadedItems = JSON.parse(itemsData);
+                        
+                        // Clean up items: remove storeData for stores that don't exist anymore
+                        if (storesData) {
+                            const loadedStores = JSON.parse(storesData);
+                            const validStoreIds = new Set(loadedStores.map(s => s.id));
+                            
+                            const cleanedItems = loadedItems.map(item => {
+                                if (item.storeData) {
+                                    const cleanedStoreData = {};
+                                    Object.keys(item.storeData).forEach(storeId => {
+                                        // Only keep store data if the store still exists
+                                        if (validStoreIds.has(storeId)) {
+                                            cleanedStoreData[storeId] = item.storeData[storeId];
+                                        }
+                                    });
+                                    return { ...item, storeData: cleanedStoreData };
+                                }
+                                return item;
+                            });
+                            
+                            setItems(cleanedItems);
+                            // Save cleaned data back to localStorage
+                            localStorage.setItem('ezshop_items', JSON.stringify(cleanedItems));
+                            
+                            console.log('✅ Cleaned up old store references from items');
+                        } else {
+                            setItems(loadedItems);
+                        }
+                    }
                 } catch (error) {
                     console.log('No saved data');
                 }
