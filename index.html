@@ -633,7 +633,12 @@
                 return (
                     <div className="flex flex-col h-full">
                         <div className="flex justify-between items-center px-4 pt-6 pb-4 border-b" style={{paddingTop: 'max(1.5rem, env(safe-area-inset-top))'}}>
-                            <h1 className="text-xl font-bold">Stores</h1>
+                            <div>
+                                <h1 className="text-xl font-bold">Stores</h1>
+                                <div className="text-xs text-gray-500 mt-1">
+                                    Debug: {getStoresToVisitCount()} stores with items
+                                </div>
+                            </div>
                             <button onClick={() => setStoresEditMode(!storesEditMode)} className="px-4 py-2 text-blue-600 min-h-[44px]">
                                 {storesEditMode ? 'Done' : 'Edit'}
                             </button>
