@@ -2,7 +2,7 @@
   "name": "CartPal - Smart Shopping Lists",
   "short_name": "CartPal",
   "description": "Offline shopping list organized by store sections. No account needed, works completely offline.",
-  "start_url": "/",
+  "start_url": "/cartpal/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#10b981",
