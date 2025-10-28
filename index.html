@@ -7,6 +7,12 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="CartPal">
     <title>CartPal</title>
+    
+    <!-- PWA Support -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#10b981">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -30,9 +36,70 @@
         .bottom-nav {
             padding-bottom: calc(env(safe-area-inset-bottom) + 16px);
         }
+        
+        /* Splash Screen */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(135deg, #10b981 0%, #22c55e 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            animation: fadeOut 0.5s ease-in-out 1.5s forwards;
+        }
+        
+        #splash-logo {
+            width: 200px;
+            height: 200px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Splash Screen -->
+    <div id="splash-screen">
+        <svg id="splash-logo" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+            <!-- Yellow shopping cart with smile -->
+            <path d="M 314 246 C 314 220 335 199 361 199 L 409 199 L 481 199 C 506 199 527 220 527 246 L 527 294 L 809 294 C 822 294 835 301 843 312 C 851 323 853 337 849 350 L 773 634 C 769 651 754 664 737 664 L 527 664 L 527 712 C 527 738 506 759 481 759 L 361 759 C 335 759 314 738 314 712 L 314 246 Z M 409 246 L 409 664 L 481 664 L 481 246 L 409 246 Z" fill="#FCD34D" stroke="none"/>
+            <!-- Smile face -->
+            <circle cx="430" cy="420" r="25" fill="#10B981"/>
+            <circle cx="530" cy="420" r="25" fill="#10B981"/>
+            <path d="M 400 500 Q 480 560 560 500" stroke="#10B981" stroke-width="20" fill="none" stroke-linecap="round"/>
+            <!-- Cart wheels -->
+            <circle cx="400" cy="800" r="50" fill="#FCD34D" stroke="none"/>
+            <circle cx="560" cy="800" r="50" fill="#FCD34D" stroke="none"/>
+            <!-- Speed lines -->
+            <path d="M 200 350 L 280 350" stroke="#FCD34D" stroke-width="20" stroke-linecap="round"/>
+            <path d="M 180 450 L 270 450" stroke="#FCD34D" stroke-width="20" stroke-linecap="round"/>
+            <path d="M 200 550 L 280 550" stroke="#FCD34D" stroke-width="20" stroke-linecap="round"/>
+        </svg>
+    </div>
+    
     <div id="root"></div>
 
     <script type="text/babel">
@@ -56,7 +123,7 @@
                                         onSave(item.id, editingItem);
                                         onClose();
                                     }} 
-                                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
                                 >
                                     Save
                                 </button>
@@ -221,7 +288,7 @@
                 <div className="px-4 pt-4 pb-4 border-b space-y-3">
                     <div className="flex justify-between items-center">
                         <h1 className="text-xl font-bold">Items</h1>
-                        <button onClick={handleEditToggle} className="px-4 py-2 text-blue-600 min-h-[44px]">
+                        <button onClick={handleEditToggle} className="px-4 py-2 text-green-600 min-h-[44px]">
                             {editMode ? 'Done' : 'Edit'}
                         </button>
                     </div>
@@ -239,20 +306,20 @@
                             type="button"
                             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                         >
-                            ×
+                            Ã—
                         </button>
                     </div>
 
                     <div className="flex gap-2">
                         <button 
                             onClick={() => handleModeChange('categories')}
-                            className={`flex-1 px-4 py-2 rounded ${viewMode === 'categories' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+                            className={`flex-1 px-4 py-2 rounded ${viewMode === 'categories' ? 'bg-green-600 text-white' : 'bg-gray-200'}`}
                         >
                             Categories
                         </button>
                         <button 
                             onClick={() => handleModeChange('alphabetical')}
-                            className={`flex-1 px-4 py-2 rounded ${viewMode === 'alphabetical' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+                            className={`flex-1 px-4 py-2 rounded ${viewMode === 'alphabetical' ? 'bg-green-600 text-white' : 'bg-gray-200'}`}
                         >
                             Items Only
                         </button>
@@ -304,15 +371,15 @@
                     
                     if (oldStoresData && !localStorage.getItem('cartpal_stores')) {
                         localStorage.setItem('cartpal_stores', oldStoresData);
-                        console.log('✅ Migrated stores data from ezShopList to CartPal');
+                        console.log('âœ… Migrated stores data from ezShopList to CartPal');
                     }
                     if (oldCategoriesData && !localStorage.getItem('cartpal_categories')) {
                         localStorage.setItem('cartpal_categories', oldCategoriesData);
-                        console.log('✅ Migrated categories data from ezShopList to CartPal');
+                        console.log('âœ… Migrated categories data from ezShopList to CartPal');
                     }
                     if (oldItemsData && !localStorage.getItem('cartpal_items')) {
                         localStorage.setItem('cartpal_items', oldItemsData);
-                        console.log('✅ Migrated items data from ezShopList to CartPal');
+                        console.log('âœ… Migrated items data from ezShopList to CartPal');
                     }
                     
                     // Load data (either migrated or existing)
@@ -348,7 +415,7 @@
                             // Save cleaned data back to localStorage
                             localStorage.setItem('cartpal_items', JSON.stringify(cleanedItems));
                             
-                            console.log('✅ Cleaned up old store references from items');
+                            console.log('âœ… Cleaned up old store references from items');
                         } else {
                             setItems(loadedItems);
                         }
@@ -637,7 +704,7 @@
                         escapeCSV(category?.name || '')
                     ];
                     stores.forEach(store => {
-                        row.push(escapeCSV('€ 0,00'));  // Properly escaped now
+                        row.push(escapeCSV('â‚¬ 0,00'));  // Properly escaped now
                         row.push(escapeCSV(item.storeData[store.id]?.section || ''));
                     });
                     rows.push(row.join(','));
@@ -679,7 +746,7 @@
                                     Total items: {items.length}
                                 </div>
                             </div>
-                            <button onClick={() => setStoresEditMode(!storesEditMode)} className="px-4 py-2 text-blue-600 min-h-[44px]">
+                            <button onClick={() => setStoresEditMode(!storesEditMode)} className="px-4 py-2 text-green-600 min-h-[44px]">
                                 {storesEditMode ? 'Done' : 'Edit'}
                             </button>
                         </div>
@@ -727,11 +794,11 @@
                                 {showAddStore ? (
                                     <div className="flex gap-2">
                                         <input type="text" value={newStoreName} onChange={(e) => setNewStoreName(e.target.value)} placeholder="Store name" className="flex-1 px-3 py-2 border rounded" autoFocus />
-                                        <button onClick={addStore} className="px-4 py-2 bg-blue-600 text-white rounded">Add</button>
+                                        <button onClick={addStore} className="px-4 py-2 bg-green-600 text-white rounded">Add</button>
                                         <button onClick={() => setShowAddStore(false)} className="px-4 py-2 border rounded">Cancel</button>
                                     </div>
                                 ) : (
-                                    <button onClick={() => setShowAddStore(true)} className="w-full py-2 border-2 border-dashed rounded flex items-center justify-center gap-2 text-blue-600">
+                                    <button onClick={() => setShowAddStore(true)} className="w-full py-2 border-2 border-dashed rounded flex items-center justify-center gap-2 text-green-600">
                                         <PlusIcon /> <span>Add Store</span>
                                     </button>
                                 )}
@@ -905,11 +972,11 @@
                                             className="flex-1 px-3 py-2 border rounded" 
                                             autoFocus 
                                         />
-                                        <button onClick={addCategory} className="px-4 py-2 bg-blue-600 text-white rounded">Add</button>
+                                        <button onClick={addCategory} className="px-4 py-2 bg-green-600 text-white rounded">Add</button>
                                         <button onClick={() => { setShowAddCategory(false); setNewCategoryName(''); }} className="px-4 py-2 border rounded">Cancel</button>
                                     </div>
                                 ) : (
-                                    <button onClick={() => setShowAddCategory(true)} className="w-full py-2 border-2 border-dashed rounded flex items-center justify-center gap-2 text-blue-600">
+                                    <button onClick={() => setShowAddCategory(true)} className="w-full py-2 border-2 border-dashed rounded flex items-center justify-center gap-2 text-green-600">
                                         <PlusIcon /> <span>Add Category</span>
                                     </button>
                                 )}
@@ -970,7 +1037,7 @@
                                 {selectedStore === 'all' ? 'All Stores' : stores.find(s => s.id === selectedStore)?.name || 'Select Store'}
                             </h1>
                             {bought.length > 0 && (
-                                <button onClick={clearBoughtItems} className="px-4 py-2 text-blue-600">Clear</button>
+                                <button onClick={clearBoughtItems} className="px-4 py-2 text-green-600">Clear</button>
                             )}
                         </div>
 
@@ -1017,7 +1084,7 @@
                                                 </div>
                                                 <div className="flex items-center gap-3">
                                                     <span className="text-lg">{item.quantity}</span>
-                                                    <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
+                                                    <div className="w-6 h-6 bg-green-600 rounded flex items-center justify-center">
                                                         <CheckIcon />
                                                     </div>
                                                 </div>
@@ -1044,10 +1111,10 @@
                             <h1 className="text-xl font-bold">File Management</h1>
                         </div>
                         <div className="flex-1 p-4 space-y-4">
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                                 <h3 className="font-semibold mb-2">Import CSV</h3>
                                 <p className="text-sm text-gray-600 mb-3">Import your data from CartPal CSV export</p>
-                                <label className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded cursor-pointer hover:bg-blue-700">
+                                <label className="flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded cursor-pointer hover:bg-green-700">
                                     <UploadIcon />
                                     <span>Choose CSV File</span>
                                     <input type="file" accept=".csv" onChange={handleCSVImport} className="hidden" />
@@ -1066,9 +1133,9 @@
                             <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                                 <h3 className="font-semibold mb-2">Data Storage</h3>
                                 <div className="text-sm text-gray-600 space-y-1">
-                                    <p>• Stores: {stores.length}</p>
-                                    <p>• Categories: {categories.length}</p>
-                                    <p>• Items: {items.length}</p>
+                                    <p>â€¢ Stores: {stores.length}</p>
+                                    <p>â€¢ Categories: {categories.length}</p>
+                                    <p>â€¢ Items: {items.length}</p>
                                     <p className="mt-3 text-xs">Data is automatically saved on your device</p>
                                 </div>
                             </div>
@@ -1080,7 +1147,7 @@
             function HelpTab() {
                 return (
                     <div className="flex flex-col h-full overflow-auto">
-                        <div className="px-4 pt-4 pb-4 border-b bg-blue-600 text-white">
+                        <div className="px-4 pt-4 pb-4 border-b bg-green-600 text-white">
                             <h1 className="text-xl font-bold">CartPal User Manual</h1>
                             <p className="text-sm mt-1 opacity-90">How to use this shopping list app</p>
                         </div>
@@ -1088,7 +1155,7 @@
                         <div className="p-4 space-y-6">
                             {/* Overview */}
                             <section>
-                                <h2 className="text-lg font-bold mb-2 text-blue-600">Overview</h2>
+                                <h2 className="text-lg font-bold mb-2 text-green-600">Overview</h2>
                                 <p className="text-sm text-gray-700">
                                     CartPal helps you organize your shopping across multiple stores. Create items, 
                                     assign them to categories, set which store section they're in, and build your shopping list.
@@ -1097,7 +1164,7 @@
 
                             {/* Stores Tab */}
                             <section>
-                                <h2 className="text-lg font-bold mb-2 text-blue-600">Stores Tab</h2>
+                                <h2 className="text-lg font-bold mb-2 text-green-600">Stores Tab</h2>
                                 <div className="space-y-2 text-sm">
                                     <p><strong>Add Stores:</strong> Tap "Edit" then add your favorite stores (e.g., Walmart, Costco).</p>
                                     <p><strong>Store Sections:</strong> Click on a store to add sections like "Produce", "Dairy", "Frozen". 
@@ -1110,13 +1177,13 @@
 
                             {/* Items Tab */}
                             <section>
-                                <h2 className="text-lg font-bold mb-2 text-blue-600">Items Tab</h2>
+                                <h2 className="text-lg font-bold mb-2 text-green-600">Items Tab</h2>
                                 <div className="space-y-2 text-sm">
                                     <p><strong>Search:</strong> Use the search bar to quickly find items. The keyboard stays open while you type!</p>
                                     <p><strong>View Modes:</strong></p>
                                     <ul className="ml-4 space-y-1">
-                                        <li>• <strong>Categories:</strong> Items grouped by category (expand/collapse)</li>
-                                        <li>• <strong>Items Only:</strong> All items alphabetically in one list</li>
+                                        <li>â€¢ <strong>Categories:</strong> Items grouped by category (expand/collapse)</li>
+                                        <li>â€¢ <strong>Items Only:</strong> All items alphabetically in one list</li>
                                     </ul>
                                     <p><strong>Add Items:</strong> In Edit mode, add items and assign them to categories.</p>
                                     <p><strong>Quantity Buttons:</strong> Use + and - to adjust how many you need.</p>
@@ -1127,7 +1194,7 @@
 
                             {/* List Tab */}
                             <section>
-                                <h2 className="text-lg font-bold mb-2 text-blue-600">Shopping List Tab</h2>
+                                <h2 className="text-lg font-bold mb-2 text-green-600">Shopping List Tab</h2>
                                 <div className="space-y-2 text-sm">
                                     <p><strong>Your Active List:</strong> Shows all items with quantity &gt; 0.</p>
                                     <p><strong>Store Filter:</strong> The list shows items for your selected store from the Stores tab.</p>
@@ -1139,7 +1206,7 @@
 
                             {/* File Tab */}
                             <section>
-                                <h2 className="text-lg font-bold mb-2 text-blue-600">File Tab</h2>
+                                <h2 className="text-lg font-bold mb-2 text-green-600">File Tab</h2>
                                 <div className="space-y-2 text-sm">
                                     <p><strong>Import CSV:</strong> Upload a previously exported CSV file to restore your data.</p>
                                     <p><strong>Export CSV:</strong> Download all your data as a backup. You can open this in Excel or 
@@ -1150,7 +1217,7 @@
 
                             {/* Tips */}
                             <section>
-                                <h2 className="text-lg font-bold mb-2 text-blue-600">Tips & Tricks</h2>
+                                <h2 className="text-lg font-bold mb-2 text-green-600">Tips & Tricks</h2>
                                 <div className="space-y-2 text-sm">
                                     <p>- Set up your stores and their sections first for the best experience.</p>
                                     <p>- Use categories like "Produce", "Snacks", "Beverages" to organize items.</p>
@@ -1162,8 +1229,8 @@
                             </section>
 
                             {/* Workflow */}
-                            <section className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                                <h2 className="text-lg font-bold mb-2 text-blue-700">Quick Workflow</h2>
+                            <section className="bg-green-50 p-4 rounded-lg border border-green-200">
+                                <h2 className="text-lg font-bold mb-2 text-green-700">Quick Workflow</h2>
                                 <div className="space-y-1 text-sm">
                                     <p><strong>1.</strong> Add your favorite stores and their sections</p>
                                     <p><strong>2.</strong> Create categories for your items</p>
@@ -1196,37 +1263,37 @@
                     </div>
 
                     <div className="flex border-t bg-white bottom-nav">
-                        <button onClick={() => setActiveTab('stores')} className={`flex-1 flex flex-col items-center py-3 ${activeTab === 'stores' ? 'text-blue-600' : 'text-gray-400'}`}>
+                        <button onClick={() => setActiveTab('stores')} className={`flex-1 flex flex-col items-center py-3 ${activeTab === 'stores' ? 'text-green-600' : 'text-gray-400'}`}>
                             <div className="relative">
                                 <HomeIcon />
                                 {getStoresToVisitCount() > 0 && (
-                                    <span className="absolute -top-1 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                                    <span className="absolute -top-1 -right-2 bg-yellow-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
                                         {getStoresToVisitCount()}
                                     </span>
                                 )}
                             </div>
                             <span className="text-xs mt-1">Stores</span>
                         </button>
-                        <button onClick={() => setActiveTab('items')} className={`flex-1 flex flex-col items-center py-3 ${activeTab === 'items' ? 'text-blue-600' : 'text-gray-400'}`}>
+                        <button onClick={() => setActiveTab('items')} className={`flex-1 flex flex-col items-center py-3 ${activeTab === 'items' ? 'text-green-600' : 'text-gray-400'}`}>
                             <ListIcon />
                             <span className="text-xs mt-1">Items</span>
                         </button>
-                        <button onClick={() => setActiveTab('list')} className={`flex-1 flex flex-col items-center py-3 ${activeTab === 'list' ? 'text-blue-600' : 'text-gray-400'}`}>
+                        <button onClick={() => setActiveTab('list')} className={`flex-1 flex flex-col items-center py-3 ${activeTab === 'list' ? 'text-green-600' : 'text-gray-400'}`}>
                             <div className="relative">
                                 <CartIcon />
                                 {getTotalItemQuantity() > 0 && (
-                                    <span className="absolute -top-1 -right-2 bg-blue-500 text-white text-xs rounded-full min-w-[20px] h-5 px-1 flex items-center justify-center font-bold">
+                                    <span className="absolute -top-1 -right-2 bg-yellow-500 text-white text-xs rounded-full min-w-[20px] h-5 px-1 flex items-center justify-center font-bold">
                                         {getTotalItemQuantity()}
                                     </span>
                                 )}
                             </div>
                             <span className="text-xs mt-1">List</span>
                         </button>
-                        <button onClick={() => setActiveTab('file')} className={`flex-1 flex flex-col items-center py-3 ${activeTab === 'file' ? 'text-blue-600' : 'text-gray-400'}`}>
+                        <button onClick={() => setActiveTab('file')} className={`flex-1 flex flex-col items-center py-3 ${activeTab === 'file' ? 'text-green-600' : 'text-gray-400'}`}>
                             <FolderIcon />
                             <span className="text-xs mt-1">File</span>
                         </button>
-                        <button onClick={() => setActiveTab('help')} className={`flex-1 flex flex-col items-center py-3 ${activeTab === 'help' ? 'text-blue-600' : 'text-gray-400'}`}>
+                        <button onClick={() => setActiveTab('help')} className={`flex-1 flex flex-col items-center py-3 ${activeTab === 'help' ? 'text-green-600' : 'text-gray-400'}`}>
                             <InfoIcon />
                             <span className="text-xs mt-1">Help</span>
                         </button>
